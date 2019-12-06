@@ -23,6 +23,14 @@ namespace Computer {
             {}
     };
 
+    class NoOverrideException : public HardwareException {
+        public:
+            /* Exception for when a virtual class isn't overridden */
+            NoOverrideException(const std::string func_name)
+                : HardwareException("unknown", "Function \"" + func_name + "\" isn't overridden by child class.")
+            {}
+    };
+
     class ExecutionException : public HardwareException {
         public:
             const char instruction;
@@ -45,15 +53,6 @@ namespace Computer {
                 : HardwareException("Memory", msg)
             {}
     };
-
-    class RegistryException : public MemoryException {
-        public:
-            /* Exception for when the user masks invalidly on the registers */
-            RegistryException(const int n)
-                : MemoryException("Can only mask registers with 1, 2 or 4; not " + std::to_string(n))
-            {}
-    };
-
     class MemoryOutOfBoundsException : public MemoryException {
         public:
             /* Exception for when a pointer points outside of available memory */
@@ -73,6 +72,23 @@ namespace Computer {
             /* Exception for when the total memory size isn't dividable by the blocksize */
             MemoryBlockMisalignmentException(const long total_size, const long block_size)
                 : MemoryException(std::to_string(total_size) + " isn't dividable by " + std::to_string(block_size))
+            {}
+    };
+
+    class RegisterException : public MemoryException {
+        public:
+            const int reg;
+            /* Base exception for all register exceptions */
+            RegisterException(const int reg, const std::string msg)
+                : reg(reg),
+                MemoryException("Register " + std::to_string(reg) + ": " + msg)
+            {}
+    };
+    class RegistryOutOfBoundsException : public RegisterException {
+        public:
+            /* Exception for when a non-existing register is accessed */
+            RegistryOutOfBoundsException(const int accessed_reg, const int max_reg)
+                : RegisterException(accessed_reg, "Does not exist, " + std::to_string(max_reg) + " is the number of registers.")
             {}
     };
 }
