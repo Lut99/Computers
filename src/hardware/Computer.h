@@ -7,6 +7,8 @@
 #ifndef COMPUTER_H
 #define COMPUTER_H
 
+#include <chrono>
+
 #include "CPU.h"
 #include "Memory.h"
 #include "HardDrive.h"
@@ -21,6 +23,8 @@ namespace Computer {
             const int n_drives;
             PCI **components;
             const int n_pci;
+
+            std::chrono::high_resolution_clock::time_point last_clock_cycle;
 
             Command *waiting_for;
         public:

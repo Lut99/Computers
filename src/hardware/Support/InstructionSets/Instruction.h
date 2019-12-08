@@ -9,6 +9,7 @@
 
 #include <string>
 #include <map>
+#include "../Version.h"
 #include "../../CPU.h"
 
 namespace Computer {
@@ -29,25 +30,16 @@ namespace Computer {
     };
 
     class InstructionSet {
-        private:
-            std::string name;
-            char version;
-
         public:
             typedef std::map<char, Instruction> InstructionMap;
 
-            /* InstructionSet baseclass. Should not be called, except from derived classes. */
-            InstructionSet(std::string name, char version);
+            /* Returns given instruction class from the instruction set. */
+            virtual Instruction get_instr(char command) const;
 
-            /* Used to return the execution function from the derived class */
-            virtual Instruction get_instr(char command);
-
-            /* Returns the name of this instructionset */
-            const std::string get_name();
-            /* Returns the version of this instructionset */
-            const char get_version();
-            /* Compares the version of this set with a given version number. Return -1 if this one is older, 0 if equal or 1 if newer. */
-            const int compare_version(const char version);
+            /* Returns the name of the instruction set. */
+            virtual const std::string get_name() const;
+            /* Returns the version of the instruction set. */
+            virtual const Version get_version() const;
     };
 }
 

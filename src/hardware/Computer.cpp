@@ -35,6 +35,8 @@ Computer::Computer::Computer(CPU *cpu, long mem_size, int n_drives, long *drive_
     }
 
     this->waiting_for = NULL;
+
+    this->last_clock_cycle = std::chrono::system_clock::now();
 }
 Computer::Computer::~Computer() {
     // Destroy everything
@@ -84,6 +86,14 @@ void Computer::Computer::mem_write(pointer addr, char *values, int n) {
 }
 
 void Computer::Computer::execute_software() {
+    // Only execute an instruction if allowed from the clockspeed
+    if (std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - this->last_clock_cycle).count() < this->cpu->info.clocktime) {
+        return;
+    }
+
+    // Advance the timer
+    this->last_clock_cycle += std::chrono::nanoseconds{this->cpu->info.clocktime};
+
     // Check if we're waiting
     if (this->waiting_for == NULL) {
         // Execute the next instruction

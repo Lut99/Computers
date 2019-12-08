@@ -8,6 +8,7 @@
 *  time.
 */
 
+#include "Support/ConfigParser.h"
 #include "Support/Encoding.h"
 #include "Support/Errors.h"
 #include "CPU.h"
@@ -16,27 +17,31 @@
 
 using namespace Computer;
 
-CPU::CPU(Memory *virt_memory) {
+CPUConfig::CPUConfig(CPUModel model, std::string name, int clockspeed, InstructionSet *instr_set)
+    :model(model),
+    name(name),
+    clockspeed(clockspeed),
+    clocktime((long)(((double) 1 / (double) clockspeed) * 1e9)),
+    instr_set(instr_set)
+{}
+
+CPU::CPU(CPUModel model, Computer *computer)
+    : info(CPUModel_config[model])
+{
     // Set the given data
-    this->mem = virt_memory;
+    this->comp = computer;
 
     // Initialize the PC to the first EEPROM address
     this->program_counter = POINTER_EEPROM;
 
     // Initialize the registry file as N_REGISTERS longs
     this->registry_file = new long[N_REGISTERS];
-
-    // Initialize everything for derived classes to NULL or -1
-    this->clockspeed = -1;
-    this->instr_set = NULL;
 }
 CPU::~CPU() {
     // Deallocate the registry
     delete[] this->registry_file;
-    // Also, possibly, deallocate the instruction set
-    if (this->instr_set != NULL) {
-        delete this->instr_set;
-    }
+    // Also, deallocate the instruction set
+    delete this->info.instr_set;
 }
 
 /* CPU-only instruction fetch. */
@@ -44,14 +49,14 @@ CPU::~CPU() {
 Instruction CPU::mem_fetch(pointer addr) {
     // First, fetch the command from the pointer
     char command;
-    this->mem->read(&command, addr, 1);
+    this->comp->mem_read(addr, &command, 1);
     
     // Try to create an instruction from our instructionset
-    Instruction to_return = this->instr_set->get_instr(command);
+    Instruction to_return = this->info.instr_set->get_instr(command);
 
     // Read the arguments
     char args[to_return.arg_size];
-    this->mem->read(args, addr + 1, to_return.arg_size);
+    this->comp->mem_read(addr + 1, args, to_return.arg_size);
 
     // Parse them in the instruction
     to_return.fetch(args);
@@ -111,11 +116,11 @@ void CPU::reg_write(int reg, char value) {
 
 /* Memory access wrappers */
 
-void CPU::mem_read(char *result, pointer addr, int n) {
-    this->mem->read(result, addr, n);
+void CPU::mem_read(pointer addr, char *result, int n) {
+    this->comp->mem_read(addr, result, n);
 }
-void CPU::mem_write(pointer addr, char *values, int n = 4) {
-    this->mem->write(addr, values, n);
+void CPU::mem_write(pointer addr, char *values, int n) {
+    this->comp->mem_write(addr, values, n);
 }
 
 void CPU::execute() {

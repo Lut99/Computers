@@ -23,26 +23,16 @@ void Instruction::fetch(char *args) {
     throw NoOverrideException("Instruction::fetch");
 }
 
-InstructionSet::InstructionSet(string name, char version) {
-    this->name = name;
-    this->version = version;
-}
-Instruction InstructionSet::get_instr(char command) {
+
+Instruction InstructionSet::get_instr(char command) const {
     /* Not implemented; throw error */
     throw NoOverrideException("InstructionSet::get_instr");
 }
-const string InstructionSet::get_name() {
-    return this->name;
+const std::string InstructionSet::get_name() const {
+    /* Not implemented; throw error */
+    throw NoOverrideException("InstructionSet::get_name");
 }
-const char InstructionSet::get_version() {
-    return this->version;
-}
-const int InstructionSet::compare_version(const char version) {
-    if (this->version < version) {
-        return -1;
-    } else if (this->version == version) {
-        return 0;
-    } else {
-        return 1;
-    }
+const Version InstructionSet::get_version() const {
+    /* Not implemented; throw error */
+    throw NoOverrideException("InstructionSet::get_version");
 }
