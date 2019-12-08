@@ -13,11 +13,16 @@
 
 using namespace Computer;
 
+/* Constructors / Deconstructors */
 
-/* RAM-memory */
+MemoryCommand::MemoryCommand(HardwareComponent *component, unsigned char operation)
+    : Command(component, operation)
+{}
+
 Memory::Memory(long size)
-    : size(size) {
-    
+    : HardwareComponent(0, "Memory"),
+    size(size)
+{
     // Check if size is dividable by MemoryBlockSize
     if (this->size % MemoryBlockSize != 0) {
         throw MemoryBlockMisalignmentException(this->size, MemoryBlockSize);
@@ -29,73 +34,101 @@ Memory::Memory(long size)
     // Malloc the memory blocklist
     this->blocks = new char*[this->n_blocks];
 
-    // Malloc the blocks
+    // Set the blocks to NULL
     for (int i = 0; i < this->size; i++) {
-        this->blocks[i] = new char[MemoryBlockSize];
+        this->blocks[i] = NULL;
     }
 }
 Memory::~Memory() {
-    // Dealloc the blocks
+    // Dealloc the blocks (if not NULL)
     for (int i = 0; i < this->n_blocks; i++) {
-        delete[] this->blocks[i];
+        if (this->blocks[i] != NULL) {
+            delete[] this->blocks[i];
+        }
     }
 
     // Dealloc the list
     delete[] this->blocks;
 }
 
+/* Read / write access for memory */
 
-void Memory::read(char *result, pointer addr, int n) {
-    // Check for out-of-bounds
+void Memory::read(pointer addr, char *result, int n) {
+    // Check if within bounds and not overflowing
     if (addr < 0 || addr >= this->size) {
         throw MemoryOutOfBoundsException(addr, this->size);
     }
-    
-    // Check for overflows
     if (addr + n >= this->size) {
         throw MemoryOverflowException(addr, n, this->size);
     }
 
-    // Now that's done, split pointer into memory block and memory index
+    // Split addr into block and index
     int block, index;
-    block = addr / this->n_blocks;
-    index = addr % this->n_blocks;
+    block = addr / MemoryBlockSize;
+    index = addr % MemoryBlockSize;
 
-    // Now fetch the given n bytes and return it in result
+    // Allocate memory if not yet done
+    if (this->blocks[block] == NULL) {
+        this->blocks[block] = new char[MemoryBlockSize];
+    }
+
+    // Copy to the result array
     for (int i = 0; i < n; i++) {
         result[i] = this->blocks[block][index];
+
+        // Increment block and index
         index++;
         if (index >= MemoryBlockSize) {
-            block++;
             index = 0;
+            block++;
+        }
+    }
+}
+void Memory::write(pointer addr, char *values, int n) {
+    // Check if within bounds and not overflowing
+    if (addr < 0 || addr >= this->size) {
+        throw MemoryOutOfBoundsException(addr, this->size);
+    }
+    if (addr + n >= this->size) {
+        throw MemoryOverflowException(addr, n, this->size);
+    }
+
+    // Split addr into block and index
+    int block, index;
+    block = addr / MemoryBlockSize;
+    index = addr % MemoryBlockSize;
+
+    // Allocate memory if not yet done
+    if (this->blocks[block] == NULL) {
+        this->blocks[block] = new char[MemoryBlockSize];
+    }
+
+    // Copy from the values array
+    for (int i = 0; i < n; i++) {
+        this->blocks[block][index] = values[i];
+
+        // Increment block and index
+        index++;
+        if (index >= MemoryBlockSize) {
+            index = 0;
+            block++;
         }
     }
 }
 
+/* Hardware Component stuff */
 
-void Memory::write(pointer addr, char *values, int n) {
-    // First, check for out-of-bounds and everything
-    if (addr < 0 || addr >= this->size) {
-        throw MemoryOutOfBoundsException(addr, this->size);
-    }
-    
-    // Check for overflows
-    if (addr + n >= this->size) {
-        throw MemoryOverflowException(addr, n, this->size);
-    }
-
-    // Then, compute block and index
-    int block, index;
-    block = addr / this->n_blocks;
-    index = addr % this->n_blocks;
-
-    // Set the new data
-    for (int i = 0; i < n; i++) {
-        this->blocks[block][index] = values[i];
-        index++;
-        if (index >= MemoryBlockSize) {
-            block++;
-            index = 0;
-        }
+void Memory::_execute_hardware(Command *cmd) {
+    // Execute stuff indicated by _to_do:
+    MemoryCommand *mem_cmd = (MemoryCommand*) cmd;
+    if (cmd->operation == 0x00) {
+        // Do a memory read
+        this->write(mem_cmd->addr, mem_cmd->result_values, mem_cmd->n);
+    } else if (cmd->operation == 0x01) {
+        // Do a memory write
+        this->read(mem_cmd->addr, mem_cmd->result_values, mem_cmd->n);
+    } else {
+        // Unknown command
+        throw UnknownCommandException(cmd->operation, this->_name);
     }
 }

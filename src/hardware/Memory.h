@@ -7,16 +7,29 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include "Support/InstructionSets/Instruction.h"
+#include "HardwareComponent.h"
 #include "Support/Types.h"
 
 namespace Computer {
-    const int MemoryBlockSize = 32;
+    const int MemoryBlockSize = 1024;
 
-    class Memory {
+    struct MemoryCommand : public Command {
+        char *result_values;
+        pointer addr;
+        int n;
+
+        MemoryCommand(HardwareComponent *component, unsigned char operation);
+    };
+
+    class Memory : public HardwareComponent {
         private:
             char **blocks;
             long n_blocks;
+
+        protected:
+            /* Overrides the HardwareComponent _execute_hardware(). This function executes the hardware side of Memory. */
+            void _execute_hardware(Command *cmd);
+
         public:
             const long size;
 
@@ -25,7 +38,7 @@ namespace Computer {
             ~Memory();
 
             /* Retrieves n bytes of memory from given location. */
-            void read(char *result, pointer addr, int n);
+            void read(pointer addr, char *result, int n);
 
             /* Sets n bytes at the given location. */
             void write(pointer addr, char *values, int n);

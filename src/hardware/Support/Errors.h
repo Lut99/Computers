@@ -31,6 +31,34 @@ namespace Computer {
             {}
     };
 
+    class ComponentException : public HardwareException {
+        public:
+            /* Base exception for Component related exceptions */
+            ComponentException(const std::string component_name, const std::string msg)
+                : HardwareException(component_name, component_name + ": " + msg);
+    };
+    class UnknownCommandException : public ComponentException {
+        public:
+            /* Exception for when an unknown command is tried to be executed on a Hardware Component */
+            UnknownCommandException(const char command_id, const std::string component_name)
+                : ComponentException(component_name, "Command " + std::to_string(command_id) + " unknown")
+            {}
+    };
+    class UnknownIdException : public ComponentException {
+        public:
+            /* Exception for when an unknown id is tried to be accessed in a queue on Hardware Component */
+            UnknownIdException(const char id, const std::string component_name)
+                : ComponentException(component_name, "Command with id " + std::to_string(id) + " is not scheduled")
+            {}
+    };
+    class CommandQueueOverflowException : public ComponentException {
+        public:
+            /* Exception for when too many commands are scheduled concurrently */
+            CommandQueueOverflowException(const int current_size, const int max_size, const std::string component_name)
+                : ComponentException(component_name, "Too many commands (" + std::to_string(current_size) + " > " + std::to_string(max_size))
+            {}
+    };
+
     class ExecutionException : public HardwareException {
         public:
             const char instruction;

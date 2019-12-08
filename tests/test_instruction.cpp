@@ -7,7 +7,7 @@
 #include <iostream>
 #include <random>
 
-#include "../src/hardware/Tools/Instruction.h"
+#include "../src/Hardware/Support/Instruction.h"
 
 using namespace std;
 using namespace Computer;
