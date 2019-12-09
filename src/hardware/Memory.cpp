@@ -6,11 +6,12 @@
 *  consecutively in memory. Each line in the address is 64-bit.
 */
 
-#include <cstddef>
+#include <iostream>
 
 #include "Support/Errors.h"
 #include "Memory.h"
 
+using namespace std;
 using namespace Computer;
 
 /* Constructors / Deconstructors */
@@ -23,6 +24,8 @@ Memory::Memory(long size)
     : HardwareComponent(0, "Memory"),
     size(size)
 {
+    cout << "Initializing Memory (" << this->size << " bytes)..." << endl;
+
     // Check if size is dividable by MemoryBlockSize
     if (this->size % MemoryBlockSize != 0) {
         throw MemoryBlockMisalignmentException(this->size, MemoryBlockSize);
@@ -38,8 +41,12 @@ Memory::Memory(long size)
     for (int i = 0; i < this->size; i++) {
         this->blocks[i] = NULL;
     }
+
+    cout << "Memory Initialized." << endl;
 }
 Memory::~Memory() {
+    cout << "Cleaning up Memory..." << endl;
+
     // Dealloc the blocks (if not NULL)
     for (int i = 0; i < this->n_blocks; i++) {
         if (this->blocks[i] != NULL) {
@@ -49,6 +56,8 @@ Memory::~Memory() {
 
     // Dealloc the list
     delete[] this->blocks;
+
+    cout << "Memory Done." << endl;
 }
 
 /* Read / write access for memory */

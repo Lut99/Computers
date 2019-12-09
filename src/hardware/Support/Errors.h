@@ -35,7 +35,8 @@ namespace Computer {
         public:
             /* Base exception for Component related exceptions */
             ComponentException(const std::string component_name, const std::string msg)
-                : HardwareException(component_name, component_name + ": " + msg);
+                : HardwareException(component_name, component_name + ": " + msg)
+            {}
     };
     class UnknownCommandException : public ComponentException {
         public:
@@ -62,16 +63,16 @@ namespace Computer {
     class ExecutionException : public HardwareException {
         public:
             const char instruction;
-            ExecutionException(const std::string component, const std::string msg, char command)
-                : HardwareException(component, msg),
+            ExecutionException(const std::string msg, char command)
+                : HardwareException("CPU", msg),
                 instruction(command)
             {}
     };
 
     class UnknownInstructionException : public ExecutionException {
         public:
-            UnknownInstructionException(const char instruction, const std::string component)
-                : ExecutionException(component, "Unknown instruction \"" + std::to_string(instruction) + "\"", instruction)
+            UnknownInstructionException(const char instruction, const std::string instr_set_name)
+                : ExecutionException("Unknown instruction \"" + std::to_string(instruction) + "\" (Instruction set: \"" + instr_set_name + "\")", instruction)
             {}
     };
 
@@ -117,6 +118,21 @@ namespace Computer {
             /* Exception for when a non-existing register is accessed */
             RegistryOutOfBoundsException(const int accessed_reg, const int max_reg)
                 : RegisterException(accessed_reg, "Does not exist, " + std::to_string(max_reg) + " is the number of registers.")
+            {}
+    };
+
+    class IOException : public HardwareException {
+        public:
+            /* Exception base class for when an real-life IO file couldn't be opened */
+            IOException(const std::string path, const std::string component)
+                : HardwareException(component, "File \"" + path + "\" could not be opened")
+            {}
+    };
+    class EEPROMException : public IOException {
+        public:
+            /* Exception for when the EEPROM file couldn't be opened */
+            EEPROMException(const std::string path)
+                : IOException(path, "Computer")
             {}
     };
 }

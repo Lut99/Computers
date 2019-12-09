@@ -7,39 +7,83 @@
 *  future.
 **/
 
+#include <iostream>
+#include <fstream>
 #include "Support/Errors.h"
 #include "Computer.h"
 
+#define EEPROM_FILE "eeprom"
+
+using namespace std;
 using namespace Computer;
 
-Computer::Computer::Computer(CPU *cpu, long mem_size, int n_drives, long *drive_sizes, int n_components, PCI **pci_components)
+Computer::Computer::Computer(CPUModel cpu_model, long mem_size, int n_drives, long *drive_sizes, int n_components, PCI **pci_components)
     :n_drives(n_drives),
     n_pci(n_components)
 {
+    cout << endl << ">>> COMPUTER BIOS v1.0.0" << endl << endl;
+
     // Store the CPU
-    this->cpu = cpu;
+    this->cpu = new CPU(cpu_model, this);
 
     // Create the memory with given size
     this->mem = new Memory(mem_size);
 
     // Create harddrives according to the given sizes
+    cout << ">>> Installing " << n_drives << " hard drives..." << endl;
     this->drives = new HardDrive*[this->n_drives];
     for (int i = 0; i < n_drives; i++) {
         this->drives[i] = new HardDrive();
     }
+    cout << ">>> Done";
 
     // Set the given PCI Components
+    cout << ">>> Installing " << n_components << " PCI Components..." << endl;
     this->components = new PCI*[this->n_pci];
     for (int i = 0; i < n_components; i++) {
         this->components[i] = pci_components[i];
     }
+    cout << ">>> Done";
 
+    // Load the EEPROM into memory
+    cout << ">>> Loading EEPROM..." << endl;
+
+    std::ifstream eeprom_file(EEPROM_FILE, ios::in | ios::binary);
+    if (!eeprom_file.is_open()) {
+        // Couldn't open it for some reason
+        throw EEPROMException(EEPROM_FILE);
+    }
+
+    // Read all bytes and put them into the first N bytes of memory
+    char buffer[100];
+    int i;
+    for (i = 0; i < this->mem->size;) {
+        // Read 100 bytes
+        int to_copy = 100;
+        if (!eeprom_file.read(buffer, to_copy)) {
+            // Update the number of read bytes
+            to_copy = eeprom_file.gcount();
+        }
+        // Copy the data to memory
+        this->mem->write(i, buffer, to_copy);
+        // Increment i to advance
+        i += to_copy;
+        if (!eeprom_file) {
+            // Stop, as this was likely the last bit of code
+            break;
+        }
+    }
+    cout << ">>> Done (read " << i << " bytes)" << endl;
+
+    cout << ">>> Finilizing..." << endl;
     this->waiting_for = NULL;
+    this->last_clock_cycle = chrono::high_resolution_clock::now();
 
-    this->last_clock_cycle = std::chrono::system_clock::now();
+    cout << ">>> BIOS booted" << endl;
 }
 Computer::Computer::~Computer() {
-    // Destroy everything
+    cout << ">>> BIOS: Cleaning up..." << endl;
+
     delete this->cpu;
     delete this->mem;
 
@@ -52,6 +96,8 @@ Computer::Computer::~Computer() {
         delete this->components[i];
     }
     delete[] this->components;
+
+    cout << ">>> BIOS: Done." << endl;
 }
 
 void Computer::Computer::mem_read(pointer addr, char *result, int n) {
@@ -87,12 +133,12 @@ void Computer::Computer::mem_write(pointer addr, char *values, int n) {
 
 void Computer::Computer::execute_software() {
     // Only execute an instruction if allowed from the clockspeed
-    if (std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - this->last_clock_cycle).count() < this->cpu->info.clocktime) {
+    if (chrono::duration_cast<chrono::nanoseconds>(chrono::high_resolution_clock::now() - this->last_clock_cycle).count() < this->cpu->info.clocktime) {
         return;
     }
 
     // Advance the timer
-    this->last_clock_cycle += std::chrono::nanoseconds{this->cpu->info.clocktime};
+    this->last_clock_cycle += chrono::nanoseconds{this->cpu->info.clocktime};
 
     // Check if we're waiting
     if (this->waiting_for == NULL) {

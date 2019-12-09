@@ -8,6 +8,8 @@
 *  time.
 */
 
+#include <iostream>
+
 #include "Support/ConfigParser.h"
 #include "Support/Encoding.h"
 #include "Support/Errors.h"
@@ -15,6 +17,7 @@
 
 #define N_REGISTERS 16
 
+using namespace std;
 using namespace Computer;
 
 CPUConfig::CPUConfig(CPUModel model, std::string name, int clockspeed, InstructionSet *instr_set)
@@ -28,6 +31,7 @@ CPUConfig::CPUConfig(CPUModel model, std::string name, int clockspeed, Instructi
 CPU::CPU(CPUModel model, Computer *computer)
     : info(CPUModel_config[model])
 {
+    cout << "Initializing CPU (" << this->info.name << " @ " << this->info.clockspeed << " KHz)..." << endl;
     // Set the given data
     this->comp = computer;
 
@@ -36,12 +40,15 @@ CPU::CPU(CPUModel model, Computer *computer)
 
     // Initialize the registry file as N_REGISTERS longs
     this->registry_file = new long[N_REGISTERS];
+    cout << "CPU Initialized." << endl;
 }
 CPU::~CPU() {
+    cout << "Cleaning up CPU..." << endl;
     // Deallocate the registry
     delete[] this->registry_file;
     // Also, deallocate the instruction set
     delete this->info.instr_set;
+    cout << "CPU Done." << endl;
 }
 
 /* CPU-only instruction fetch. */

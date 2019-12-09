@@ -29,7 +29,7 @@ namespace Computer {
             Command *waiting_for;
         public:
             /* Creates the computer class. Need to give a type of CPU to use, the memory size (in bytes), the sizes of the harddrives (0 is no drive at that slot) and PCI components used (specify NULL to give no components). */
-            Computer(CPU *cpu, long mem_size, int n_drives, long *drive_sizes, int n_components, PCI **pci_components);
+            Computer(CPUModel cpu_model, long mem_size, int n_drives, long *drive_sizes, int n_components, PCI **pci_components);
             ~Computer();
             
             /* Reads n bytes from main memory at pointer addr and stores the result in the given pointer. */
