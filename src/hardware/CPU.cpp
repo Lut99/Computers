@@ -56,14 +56,14 @@ CPU::~CPU() {
 Instruction CPU::mem_fetch(pointer addr) {
     // First, fetch the command from the pointer
     char command;
-    this->comp->mem_read(addr, &command, 1);
+    this->comp->mem->read(addr, &command, 1);
     
     // Try to create an instruction from our instructionset
     Instruction to_return = this->info.instr_set->get_instr(command);
 
     // Read the arguments
     char args[to_return.arg_size];
-    this->comp->mem_read(addr + 1, args, to_return.arg_size);
+    this->comp->mem->read(addr + 1, args, to_return.arg_size);
 
     // Parse them in the instruction
     to_return.fetch(args);

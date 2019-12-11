@@ -41,6 +41,8 @@ namespace Computer {
             void execute_hardware();
             /* SW Execution */
             void execute_software();
+
+            friend class CPU;
     };
 }
 
