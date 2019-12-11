@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "Support/Errors.h"
+#include "../support/Errors.h"
 #include "Computer.h"
 
 #define EEPROM_FILE "eeprom"

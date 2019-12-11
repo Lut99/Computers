@@ -8,7 +8,7 @@
 #define MEMORY_H
 
 #include "HardwareComponent.h"
-#include "Support/Types.h"
+#include "Types.h"
 
 namespace Computer {
     const int MemoryBlockSize = 1024;

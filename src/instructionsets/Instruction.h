@@ -9,8 +9,8 @@
 
 #include <string>
 #include <map>
-#include "../Version.h"
-#include "../../CPU.h"
+#include "../Support/Version.h"
+#include "../Hardware/CPU.h"
 
 namespace Computer {
     struct Instruction {

@@ -6,7 +6,7 @@
 *  for hardware access.
 **/
 
-#include "Support/Errors.h"
+#include "../support/Errors.h"
 #include "HardwareComponent.h"
 
 using namespace std;

@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-#include "Support/Errors.h"
+#include "../support/Errors.h"
 #include "Memory.h"
 
 using namespace std;

@@ -10,7 +10,7 @@
 #include <string>
 #include "Computer.h"
 #include "Memory.h"
-#include "Support/InstructionSets/Instruction.h"
+#include "../instructionsets/Instruction.h"
 
 namespace Computer {
     enum CPUModel {

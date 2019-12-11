@@ -10,9 +10,8 @@
 
 #include <iostream>
 
-#include "Support/ConfigParser.h"
-#include "Support/Encoding.h"
-#include "Support/Errors.h"
+#include "../support/Encoding.h"
+#include "../support/Errors.h"
 #include "CPU.h"
 
 #define N_REGISTERS 16
