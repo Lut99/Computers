@@ -6,5 +6,5 @@ test_instruction: tests/test_instruction.cpp src/Hardware/Support/Instruction.cp
 test_config_parser: tests/test_config_parser.cpp src/Hardware/Support/ConfigParser.cpp
 	$(CC) $(CC_ARGS) -o tests/bin/test_config_parser tests/test_config_parser.cpp src/Hardware/Support/ConfigParser.cpp
 
-chaos_compiler: src/compilers/ChaosCompiler/ChaosCompiler.cpp
-	$(CC) $(CC_ARGS) -o bin/compilers/linux64/chaos_make src/compilers/ChaosCompiler/ChaosCompiler.cpp
+chaos_compiler: src/compilers/ChaosCompiler/ChaosCompiler.cpp src/compilers/ChaosCompiler/Chaos1_0.cpp
+	$(CC) $(CC_ARGS) -o bin/compilers/linux64/chaos_make src/compilers/ChaosCompiler/ChaosCompiler.cpp src/compilers/ChaosCompiler/Chaos1_0.cpp
