@@ -97,6 +97,11 @@ Computer::Computer::~Computer() {
     }
     delete[] this->components;
 
+    // Also clean the waiting command if there is one
+    if (this->waiting_for != NULL) {
+        delete this->waiting_for;
+    }
+
     cout << ">>> BIOS: Done." << endl;
 }
 
@@ -147,11 +152,20 @@ void Computer::Computer::execute_software() {
     } else {
         // Check if the waiting_for is done now
         if (this->waiting_for->ready) {
-            // It is, resume execution for the command
+            // It is, store the pointer so it isn't overwritten by accident
+            Command *cmd = this->waiting_for;
+
+            // Now resume execution
             this->cpu->execute();
-            // Clear the command afterwards
-            delete this->waiting_for;
-            this->waiting_for = NULL;
+
+            // Check if the command has been replaced by a new one
+            if (this->waiting_for == cmd) {
+                // It hasn't: clear the waiting_for
+                this->waiting_for = NULL;
+            }
+
+            // In any case, remove the old command
+            delete cmd;
         }
         // Otherwise, we have to wait for the hardware thread to handle it; return
     }
@@ -167,6 +181,6 @@ void Computer::Computer::execute_hardware() {
     HardwareComponent *component = this->waiting_for->component;
     component->_execute_hardware(this->waiting_for);
     
-    // Set the command's status
+    // Update the command's status
     this->waiting_for->ready = true;
 }
