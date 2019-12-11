@@ -12,7 +12,7 @@
 
 #include <iostream>
 #include <fstream>
-#include <stringstream>
+#include <sstream>
 #include <cerrno>
 #include <cstring>
 
