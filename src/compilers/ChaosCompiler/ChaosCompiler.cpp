@@ -12,7 +12,9 @@
 
 #include <iostream>
 #include <fstream>
-#include <strings.h>
+#include <stringstream>
+#include <cerrno>
+#include <cstring>
 
 #include "Chaos1_0.h"
 
@@ -81,6 +83,22 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    // Open file handles and load prepare the instruction set compiler
-    // TBD
+    // Open file handles and prepare the instruction set compiler
+    ifstream src(ARG_SOURCE_FILE);
+    if (!src.is_open()) {
+        cerr << "Could not open file \"" << ARG_SOURCE_FILE << "\": " << strerror(errno) << endl;
+        exit(1);
+    }
+    ofstream bin(ARG_OUTPUT_FILE, ios::out | ios::binary);
+    if (!bin.is_open()) {
+        // Close the src file again
+        src.close();
+        cerr << "Could not open file \"" << ARG_OUTPUT_FILE << "\": " << strerror(errno) << endl;
+        exit(1);
+    }
+    // Convert ARG_INSTR_SET to lowercase
+    stringstream sstr;
+    for (int i = 0; i < ARG_INSTR_SET.length(); i++) {
+        sstr << tolower(ARG_INSTR_SET[i]);
+    }
 }
