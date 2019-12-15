@@ -115,6 +115,7 @@ int main(int argc, char **argv) {
     if (ARG_VERBOSE) {
         cout << ">> Getting correct compiler..." << endl;
     }
+
     // Check if it matches an identifier
     if (ARG_INSTR_SET == "1_0_0") {
         // Store the correction function pointer

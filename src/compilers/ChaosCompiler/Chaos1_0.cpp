@@ -8,49 +8,41 @@
 #include <iostream>
 #include <sstream>
 
+#include "../support/LinkedList.h"
 #include "Chaos1_0.h"
 
 using namespace std;
 
-string *resize(string *to_resize, int old_size, int new_size) {
-    string *resized = new string[new_size];
-    for (int i = 0; i < old_size; i++) {
-        resized[i] = to_resize[i];
-    }
-    delete[] to_resize;
-    return resized;
-}
-
 int string_split(string to_split, string **result, char delimiter = ' ') {
-    string *list = new string[0];
-    int parts = 0;
-    stringstream part;
-    int in_stream = 0;
+    // Create a list for the stringstreams
+    DataTypes::LinkedList<string> list;
+
+    // Iterate over the string and split into multiple stringstreams
+    stringstream sstr;
+    int in_str = 0;
     for (int i = 0; i < to_split.length(); i++) {
         if (to_split[i] == delimiter) {
-            // Resize to one bigger and put the stream in it
-            list = resize(list, parts, parts + 1);
-            list[parts] = part.str();
-            parts++;
-            // Reset the stream
-            part.str("");
-            part.clear();
-            in_stream = 0;
+            // Append the latest string to the list
+            list.append(sstr.str());
+            sstr.str("");
+            sstr.clear();
+            in_str = 0;
         } else {
-            part << to_split[i];
-            in_stream++;
+            // Append to the last stringstream
+            sstr << to_split[i];
+            in_str++;
         }
     }
-    // If there is any part left, resize and add
-    if (in_stream > 0) {
-        // Resize to one bigger and put the stream in it
-        list = resize(list, parts, parts + 1);
-        list[parts] = part.str();
-        parts++;
+    // Add any leftover stringstreams
+    if (in_str) {
+        list.append(sstr.str());
     }
-    // Return
-    (*result) = list;
-    return parts;
+
+    // Return the list as array
+    (*result) = list.to_array();
+    
+    // Done
+    return list.length();
 }
 
 void Compiler::Chaos::parse_chaos_1_0_0(ifstream& src, ofstream& bin, bool verbose) {
