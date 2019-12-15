@@ -14,6 +14,23 @@
 using namespace std;
 using namespace DataTypes;
 
+template <class T> LinkedListIterator<T>::LinkedListIterator(LinkedList<T> l) {
+    // Create a new element that's a copy of the given one
+    this->l = l.copy();
+
+    // Initialize the counters
+    this->n = l->first;
+}
+template <class T> LinkedListIterator<T>::~LinkedListIterator() {
+    delete this->l;
+}
+template <class T> bool LinkedListIterator<T>::next(T& value) {
+    // Get the value
+    value = this->n->value;
+    this->n = this->n->next;
+    return this->n != NULL;
+}
+
 /* CLASS DEFINITIONS */
 template <class T> LinkedList<T>::LinkedList() {
     // Set the value
@@ -184,5 +201,16 @@ template <class T> T* LinkedList<T>::to_array() {
         to_return[i] = n->value;
         i++;
     }
+    return to_return;
+}
+
+template <class T> LinkedList<T>* LinkedList<T>::copy() {
+    // Create the new object
+    LinkedList<T> *to_return = new LinkedList<T>;
+    // For every item, append that value to the other side
+    for (Node<T> *n = this->first; n != NULL; n = n->next) {
+        to_return->append(n);
+    }
+    // Done
     return to_return;
 }
