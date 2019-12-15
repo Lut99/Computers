@@ -6,6 +6,7 @@
 *  much resizing, and that it can contain any type.
 **/
 
+#include <iostream>
 #include <sstream>
 
 #include "LinkedList.h"
@@ -13,140 +14,161 @@
 using namespace std;
 using namespace DataTypes;
 
-/* VALUE TO STRING CONVERSION */
-template <typename T> const std::string value_to_string(T value) {
-    // Three cases:
-    if (std::is_integral<T>::value) {
-        // Return the to_string value of it
-        return std::to_string(value);
-    } else if (std::is_pointer<T>::value) {
-        // Return the to_string value of it, after casted to int
-        return std::to_string(reinterpret_cast<std::uintptr_t>(value));
-    }
-    // Else, return constant value
-    return "<element>";
-}
-template <> const std::string value_to_string(std::string value) {
-    // Simply return the value, but wrapped in ""
-    return "\"" + value + "\"";
-}
-template <> const std::string value_to_string(char *value) {
-    // Simply return the value as string, but wrapped in ""
-    std::string s_value(value);
-    return "\"" + s_value + "\"";
-}
-
 /* CLASS DEFINITIONS */
-template <typename T> LinkedList<T>::LinkedList() {
-    // Set the first pointer to NULL
-    this->first_node = NULL;
-    // Set the size to 0
-    this->n_nodes = 0;
+template <class T> LinkedList<T>::LinkedList() {
+    // Set the value
+    this->first = NULL;
+    this->last = NULL;
+    this->size = 0;
 }
-template <typename T> LinkedList<T>::~LinkedList() {
-    // Undeclare any nodes recursively
-    for (Node<T> *next = this->first_node; next != NULL;) {
-        Node<T> *temp = next->next;
-        delete next;
-        next = temp;
+template <class T> LinkedList<T>::~LinkedList() {
+    // Undeclare any nodes
+    Node<T> *temp;
+    for (Node<T> *n = this->first; n != NULL;) {
+        temp = n->next;
+        delete n;
+        n = temp;
     }
 }
 
-template <typename T> void LinkedList<T>::insert(std::size_t index, T value) {
-    // Check if the index is valid
-    if (index < 0 || index > this->n_nodes) {
-        throw runtime_error("Index too large; " + std::to_string(index) + " > " + std::to_string(this->n_nodes));
+template <class T> Node<T>* LinkedList<T>::get_node(std::size_t index) {
+    // Check if the index is out of bounds
+    if (index < 0 || index >= this->size) {
+        // Error: out-of-bounds
+        throw runtime_error("Index out of bounds: " + std::to_string(index) + " >= " + std::to_string(this->size));
     }
+    // Loop until found
+    Node<T> *to_return = this->first;
+    for (std::size_t i = 0; i < index; i++) {
+        to_return = to_return->next;
+    }
+    return to_return;
+}
 
-    // Create new node
+template <class T> void LinkedList<T>::prepend(T value) {
     Node<T> *new_node = new Node<T>;
     new_node->value = value;
+
+    // Put it at the start
+    new_node->next = this->first;
+    this->first = new_node;
+
+    // Increment the size
+    this->size++;
+
+    // Update the last pointer (if applicable)
+    if (new_node->next == NULL) {
+        this->last = new_node;
+    }
+}
+template <class T> void LinkedList<T>::insert(std::size_t index, T value) {
+    // Undertake particular action if needed
+    if (index == 0) {
+        // Run prepend instead
+        return this->prepend(value);
+    } else if (index == this->size) {
+        // Run append
+        return this->append(value);
+    } else if (index < 0 || index > this->size) {
+        // Error: out-of-bounds
+        throw runtime_error("Index out of bounds: " + std::to_string(index) + " > " + std::to_string(this->size));
+    }
+
+    Node<T> *new_node = new Node<T>;
+    new_node->value = value;
+
+    // Now index is within bounds and not an edge, get the node before the index
+    Node<T> *prev_node = this->get_node(index - 1);
+
+    // Now insert new_node between prev_node and it's next one
+    new_node->next = prev_node->next;
+    prev_node->next = new_node;
+
+    // Increment the size
+    this->size++;
+
+    // Update the last pointer (if applicable)
+    if (new_node->next == NULL) {
+        this->last = new_node;
+    }
+}
+template <class T> void LinkedList<T>::append(T value) {
+    Node<T> *new_node = new Node<T>;
+    new_node->value = value;
+
+    // Put it at the end
+    if (this->last != NULL) {
+        this->last->next = new_node;
+    }
+    this->last = new_node;
     new_node->next = NULL;
 
-    // Get the node at the correct position
-    Node<T> *prv_node = NULL;
-    Node<T> *old_node = this->first_node;
-    for (int i = 0; i < index; i++) {
-        // Advance to the next node
-        prv_node = old_node;
-        old_node = old_node->next;
+    // Update first as well
+    if (this->first == NULL) {
+        this->first = new_node;
     }
-    if (old_node == NULL) {
-        // No need to replace, just add to the end
-        prv_node->next = new_node;
-    } else {
-        // Put the new_node in between these two
-        prv_node->next = new_node;
-        new_node->next = old_node;
-    }
-    this->n_nodes++;
 
-    // Done
-}
-template <typename T> void LinkedList<T>::append(T value) {
-    // Return the insert at position (end)
-    return this->insert(this->n_nodes, value);
-}
-template <typename T> void LinkedList<T>::prepend(T value) {
-    // Return the insert at position 0
-    return this->insert(0, value);
+    // Increment the size
+    this->size++;
 }
 
-template <typename T> T LinkedList<T>::get(std::size_t index) {
-    // Check if the index is valid
-    if (index < 0 || index >= this->n_nodes) {
-        throw runtime_error("Index too large; " + std::to_string(index) + " >= " + std::to_string(this->n_nodes));
-    }
-
-    // Iterate until the correct index has been reached
-    Node<T> node = this->first_node;
-    for (int i = 0; i <= index; i++) {
-        node = node->next;
-    }
-
-    // Return that value
-    return node->value;
-}
-template <typename T> T LinkedList<T>::operator[](std::size_t index) {
-    // Return the get-equivalent
-    return this->get(index);
+template <class T> T LinkedList<T>::get(std::size_t index) {
+    // Get the node at that index
+    Node<T> *n = this->get_node(index);
+    // Return the value
+    return n->value;
 }
 
-template <typename T> void LinkedList<T>::remove(std::size_t index) {
-    // Check if the index is valid
-    if (index < 0 || index >= this->n_nodes) {
-        throw runtime_error("Index too large; " + std::to_string(index) + " >= " + std::to_string(this->n_nodes));
+template <class T> void LinkedList<T>::remove(std::size_t index) {
+    // Check if witin bounds
+    if (index < 0 || index >= this->size) {
+        throw runtime_error("Index out of bounds: " + std::to_string(index) + " >= " + std::to_string(this->size));
+    }
+    
+    // If the first index, undertake special action
+    if (index == 0) {
+        Node<T> *to_remove = this->first;
+        this->first = to_remove->next;
+        delete to_remove;
+        return;
     }
 
-    // Get the node at the correct position
-    Node<T> *prv_node = NULL;
-    Node<T> *rem_node = this->first_node;
-    for (int i = 0; i < index; i++) {
-        // Advance to the next node
-        prv_node = rem_node;
-        rem_node = rem_node->next;
-    }
+    // Otherwise, loop to find the node preceding this one
+    Node<T> *prev_node = this->get_node(index - 1);
+    Node<T> *to_remove = prev_node->next;
 
     // Set the pointers correctly
-    prv_node->next = rem_node->next;
+    prev_node->next = to_remove->next;
+    delete to_remove;
 
-    // Remove the rem_node
-    delete rem_node;
+    // Update the size
+    this->size--;
+
+    // Update the last if needed
+    if (prev_node->next == NULL) {
+        this->last = prev_node;
+    }
 }
 
-template <typename T> const std::size_t LinkedList<T>::length() const {
-    return this->n_nodes;
-}
-
-template <typename T> const std::string LinkedList<T>::to_string() const {
-    stringstream sstr;
+template <class T> std::string LinkedList<T>::to_string() {
+    std::stringstream sstr;
     sstr << "[";
-    for (Node<T> *node = this->first_node; node != NULL; node = node->next) {
-        if (node != this->first_node) {
+    // Loop through the elements and print them all out
+    for (Node<T> *n = this->first; n != NULL; n = n->next) {
+        // Determine if a comma is to be added
+        if (n != this->first) {
             sstr << ", ";
         }
-        sstr << this->value_to_string(node->value);
+        sstr << n->value;
+
+        // Quit the loop
+        if (n->next != NULL && n == n->next->next) {
+            std::cout << n->value << std::endl;
+            std::cout << n->next->value << std::endl;
+            break;
+        }
     }
+    // Add final ] and return
     sstr << "]";
     return sstr.str();
 }

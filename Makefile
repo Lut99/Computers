@@ -9,7 +9,7 @@ test_config_parser: tests/test_config_parser.cpp src/Hardware/Support/ConfigPars
 chaos_compiler: src/compilers/ChaosCompiler/ChaosCompiler.cpp src/compilers/ChaosCompiler/Chaos1_0.cpp
 	$(CC) $(CC_ARGS) -o bin/compilers/linux64/chaos_make src/compilers/ChaosCompiler/ChaosCompiler.cpp src/compilers/ChaosCompiler/Chaos1_0.cpp
 
-linked_list: src/support/LinkedList.cpp
+LinkedList.o: src/support/LinkedList.cpp
 	$(CC) $(CC_ARGS) -o bin/objects/linux64/LinkedList.o -c src/support/LinkedList.cpp
-test_linked_list: tests/test_linked_list.cpp bin/objects/linux64/LinkedList.o
-	$(CC) $(CC_ARDS) tests/test_linked_list.cpp bin/objects/linux64/LinkedList.o -o tests/bin/test_linked_list
+test_linked_list: tests/test_linked_list.cpp LinkedList.o
+	$(CC) $(CC_ARGS) -o tests/bin/test_linked_list tests/test_linked_list.cpp bin/objects/linux64/LinkedList.o
