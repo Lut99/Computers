@@ -28,6 +28,9 @@ namespace DataTypes {
             /* The LinkedList class can store any number of objects, of which the type is specified as object. Not very good at random access, though, but quick to rescale. */
             LinkedList();
             ~LinkedList();
+
+            /* Returns the number of elements in the list */
+            const std::size_t length() const;
             
             /* Prepends a new value to the beginning of the list */
             void prepend(T value);
@@ -44,6 +47,9 @@ namespace DataTypes {
 
             /* Converts the list to a nice string representation */
             std::string to_string();
+
+            /* Returns a pointer to a newly allocated array version of the LinkedList. Note that this will have to be deallocated later on. */
+            T* to_array();
     };
 }
 

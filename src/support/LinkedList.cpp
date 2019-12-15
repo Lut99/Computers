@@ -45,6 +45,10 @@ template <class T> Node<T>* LinkedList<T>::get_node(std::size_t index) {
     return to_return;
 }
 
+template <class T> const std::size_t LinkedList<T>::length() const {
+    return this->size;
+}
+
 template <class T> void LinkedList<T>::prepend(T value) {
     Node<T> *new_node = new Node<T>;
     new_node->value = value;
@@ -171,4 +175,14 @@ template <class T> std::string LinkedList<T>::to_string() {
     // Add final ] and return
     sstr << "]";
     return sstr.str();
+}
+
+template <class T> T* LinkedList<T>::to_array() {
+    T* to_return = new T[this->size];
+    std::size_t i = 0;
+    for (Node<T> *n = this->first; n != NULL; n = n->next) {
+        to_return[i] = n->value;
+        i++;
+    }
+    return to_return;
 }
