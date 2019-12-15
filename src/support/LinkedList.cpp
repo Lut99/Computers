@@ -1,6 +1,8 @@
 /* LINKED LIST.cpp
 *    by Lut99
 *
+*  Version: 1.0.0
+*
 *  A datatstucture that mimics an array, except that it is very bad at random
 *  access. The advantage is, however, that new elements can added without
 *  much resizing, and that it can contain any type.
@@ -16,19 +18,24 @@ using namespace DataTypes;
 
 template <class T> LinkedListIterator<T>::LinkedListIterator(LinkedList<T> l) {
     // Create a new element that's a copy of the given one
-    this->l = l.copy();
+    this->l = new LinkedList<T>(l);
 
     // Initialize the counters
-    this->n = l->first;
+    this->n = this->l->first;
+    this->i = 0;
+    this->max = this->l->length();
 }
 template <class T> LinkedListIterator<T>::~LinkedListIterator() {
     delete this->l;
 }
 template <class T> bool LinkedListIterator<T>::next(T& value) {
     // Get the value
-    value = this->n->value;
-    this->n = this->n->next;
-    return this->n != NULL;
+    if (this->n != NULL) {
+        value = this->n->value;
+        this->n = this->n->next;
+    }
+    i++;
+    return this->i <= this->max;
 }
 
 /* CLASS DEFINITIONS */
@@ -37,6 +44,29 @@ template <class T> LinkedList<T>::LinkedList() {
     this->first = NULL;
     this->last = NULL;
     this->size = 0;
+}
+template <class T> LinkedList<T>::LinkedList(LinkedList<T>& list) {
+    // Create new nodes, in chain
+    Node<T> *n = NULL;
+    Node<T> *prev_n = NULL;
+    this->size = 0;
+    for (Node<T> *list_n = list.first; list_n != NULL; list_n = list_n->next) {
+        n = new Node<T>;
+        n->value = list_n->value;
+        n->next = NULL;
+
+        if (list_n == list.first) {
+            // Set it as first
+            this->first = n;
+        } else {
+            prev_n->next = n;
+        }
+        prev_n = n;
+        this->size++;
+    }
+    // Set the last pointer correct
+    this->last = n;
+
 }
 template <class T> LinkedList<T>::~LinkedList() {
     // Undeclare any nodes
@@ -201,16 +231,5 @@ template <class T> T* LinkedList<T>::to_array() {
         to_return[i] = n->value;
         i++;
     }
-    return to_return;
-}
-
-template <class T> LinkedList<T>* LinkedList<T>::copy() {
-    // Create the new object
-    LinkedList<T> *to_return = new LinkedList<T>;
-    // For every item, append that value to the other side
-    for (Node<T> *n = this->first; n != NULL; n = n->next) {
-        to_return->append(n);
-    }
-    // Done
     return to_return;
 }

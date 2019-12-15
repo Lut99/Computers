@@ -16,6 +16,8 @@ namespace DataTypes {
         Node<T> *next;
     };
 
+    template <class T> class LinkedListIterator;
+
     template <class T> class LinkedList {
         private:
             Node<T> *first;
@@ -27,6 +29,8 @@ namespace DataTypes {
         public:
             /* The LinkedList class can store any number of objects, of which the type is specified as object. Not very good at random access, though, but quick to rescale. */
             LinkedList();
+            /* Copy constructor */
+            LinkedList(LinkedList<T>& list);
             /* Additional copy constructor for the LinkedList. */
             ~LinkedList();
 
@@ -52,9 +56,6 @@ namespace DataTypes {
             /* Returns a pointer to a newly allocated array version of the LinkedList. Note that this will have to be deallocated later on. */
             T* to_array();
 
-            /* Copies the LinkedList and returns reference to a new copy. */
-            LinkedList<T>* copy();
-
             /* Lets the iterator be a friend for efficient memory access. */
             friend class LinkedListIterator<T>;
     };
@@ -63,6 +64,8 @@ namespace DataTypes {
         private:
             LinkedList<T> *l;
             Node<T> *n;
+            int i;
+            int max;
         public:
             /* The LinkedListIterator is used to get the elements stored in the LinkedList one-by-one. Note that the LinkedList in question is copied, and can therefore be modified during iteration. */
             LinkedListIterator(LinkedList<T> l);
