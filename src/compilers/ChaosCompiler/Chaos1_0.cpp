@@ -13,6 +13,41 @@
 
 using namespace std;
 
+/* INSTRUCTION PARSERS HELPERS */
+/* Parses '$regX', '<regX' or '0xXX' syntax. The int returned specifies which of the versions it is (0=register, 1=memory and 2 is constant), and the value integer becomes the register or memory address, respectively, or in the last case the constant value. If -1 is returned, then an error happened, of which the error code is specified in the value variable. */
+int tool_reg(string arg, int& value) {
+    // Try to see if it's a memory or register value
+    if (arg[0] == '$') {
+        // Try to parse as registry memory value
+        if (arg[1] != 'r' or arg[2] != 'e' or arg[3] != 'g') {
+            // Return 'registry syntax error'
+            value = -1;
+            return -1;
+        }
+        int reg = std::stoi(arg.substr(4));
+    } else if (arg[0] == '<') {
+        // Try to parse as registry memory value
+        if (arg[1] != 'r' or arg[2] != 'e' or arg[3] != 'g') {
+            // Return 'registry syntax error'
+            value = -1;
+            return -1;
+        }
+    } else {
+        // Try to parse as constant
+    }
+}
+
+/* INSTRUCTION PARSERS */
+string parse_add(string *args, ofstream& output_file) {
+    // Write the binary ADD ID to the file
+    output_file << 0x00;
+    // Next, parse the instructions
+}
+
+Compiler::Chaos::idmap Compiler::Chaos::INSTRUCTION_MAP = {
+    {"ADD", parse_add}
+};
+
 int string_split(string to_split, string **result, char delimiter = ' ') {
     // Create a list for the stringstreams
     DataTypes::LinkedList<string> list;
