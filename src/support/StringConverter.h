@@ -26,7 +26,7 @@ namespace StringConverter {
         "ParseLastNumber"
     };
 
-    class StringConvertionException : std::exception {
+    class StringConvertionException : public std::exception {
         public:
             const std::string str;
             const std::string msg;
@@ -41,24 +41,34 @@ namespace StringConverter {
                 mode_name(StringConverterModeToText[forgiveness_mode])
             {}
     };
-    class IllegalCharacterException : StringConvertionException {
+    class IllegalCharacterException : public StringConvertionException {
+        private:
+            const std::string create_msg(const char character, const std::string to_parse) const {
+                std::string msg;
+                msg += "Invalid '";
+                msg += character;
+                msg += "' character encountered in string: \"";
+                msg += to_parse;
+                msg += "\"";
+                return msg;
+            }
         public:
             const char chr;
 
             /* Exception for when the mode is too strict and an illegal character has been found. */
             IllegalCharacterException(const char character, const std::string to_parse, const StringConverterMode forgiveness_mode)
-                : StringConvertionException(to_parse, "Illegal character encountered in: \"" + to_parse + "\": '" + character + "' (mode: " + StringConverterModeToText[forgiveness_mode] + ")", forgiveness_mode),
+                : StringConvertionException(to_parse, create_msg(character, to_parse), forgiveness_mode),
                 chr(character)
             {}
     };
-    class NoNumberException : StringConvertionException {
+    class NoNumberException : public StringConvertionException {
         public:
             /* Exception for when no numeric character has been found in the string (either empty string or when mode is ParseFirstNumber or ParseLastNumber) */
             NoNumberException(const std::string to_parse, const StringConverterMode forgiveness_mode)
                 : StringConvertionException(to_parse, "No numbers found in: \"" + to_parse + "\"", forgiveness_mode)
             {}
     };
-    class OverflowException : StringConvertionException {
+    class OverflowException : public StringConvertionException {
         public:
             const std::string num;
             const std::string type;

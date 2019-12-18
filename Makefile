@@ -13,3 +13,8 @@ LinkedList.o: src/support/LinkedList.cpp
 	$(CC) $(CC_ARGS) -o bin/objects/linux64/LinkedList.o -c src/support/LinkedList.cpp
 test_linked_list: tests/test_linked_list.cpp LinkedList.o
 	$(CC) $(CC_ARGS) -o tests/bin/test_linked_list tests/test_linked_list.cpp bin/objects/linux64/LinkedList.o
+
+StringConverter.o: src/support/StringConverter.cpp
+	$(CC) $(CC_ARGS) -o bin/objects/linux64/StringConverter.o -c src/support/StringConverter.cpp
+test_stringconverter: tests/test_stringconverter.cpp StringConverter.o
+	$(CC) $(CC_ARGS) -o tests/bin/test_stringconverter tests/test_stringconverter.cpp bin/objects/linux64/StringConverter.o
