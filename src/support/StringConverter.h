@@ -80,6 +80,18 @@ namespace StringConverter {
                 type(type_name)
             {}
     };
+    class UnderflowException : public StringConvertionException {
+        public:
+            const std::string num;
+            const std::string type;
+
+            /* Exception for when the to-be-parsed number causes an underflow */
+            UnderflowException(const std::string num_to_parse, const std::string to_parse, const std::string type_name, const StringConverterMode forgiveness_mode)
+                : StringConvertionException(to_parse, "The number \"" + num_to_parse + "\" is too small to be parsed as " + type_name, forgiveness_mode),
+                num(num_to_parse),
+                type(type_name)
+            {}
+    };
 
     /* Converts the value in a string to an unsigned char. If it fails, an appropriate derivation of StringConvertionException is thrown. */
     unsigned char toUChar(std::string to_parse, StringConverterMode mode = NoForgiveness);

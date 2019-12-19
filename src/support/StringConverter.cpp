@@ -69,7 +69,7 @@ unsigned int StringConverter::toUInt(std::string to_parse, StringConverterMode m
     }
 
     // Parse the actual number from left to right
-    unsigned int result = 0;
+    unsigned long result = 0;
     std::string num_to_parse = sstr.str();
     unsigned long times = 1;
     for (int i = 0; i < num_to_parse.length(); i++) {
@@ -79,7 +79,7 @@ unsigned int StringConverter::toUInt(std::string to_parse, StringConverterMode m
 
         // First, check if the value of this number overflows
         if (((unsigned long)(c - '0')) > ULONG_MAX / times) {
-            throw OverflowException(num_to_parse, to_parse, "uint", mode);
+            throw OverflowException(num_to_parse, to_parse, "unsigned long", mode);
         }
 
         // Compute the value of this number
@@ -87,7 +87,7 @@ unsigned int StringConverter::toUInt(std::string to_parse, StringConverterMode m
         //std::cout << "Value in number: " << value << std::endl;
 
         // Check if an overflow for result would occur
-        if (result > UINT32_MAX - value) {
+        if (result > UINT_MAX - value) {
             throw OverflowException(num_to_parse, to_parse, "uint", mode);
         }
 
@@ -155,24 +155,34 @@ int StringConverter::toInt(std::string to_parse, StringConverterMode mode) {
     }
 
     // Parse the actual number from left to right
-    unsigned int result;
+    unsigned long result = 0;
     std::string num_to_parse = sstr.str();
     unsigned long times = 1;
     for (int i = 0; i < num_to_parse.length(); i++) {
         char c = num_to_parse[num_to_parse.length() - 1 - i];
 
+        // Compute the theoretical maximum for the div
+        int ceiling = LONG_MAX / times;
+        if (sign < 0) {
+            LONG_MAX / (times + 1);
+        }
+
         // First, check if the value of this number overflows
-        if (((unsigned long)(c - '0')) > ULONG_MAX / times) {
-            throw OverflowException(num_to_parse, to_parse, "uint", mode);
+        if (((unsigned long)(c - '0')) > LONG_MAX / times) {
+            throw OverflowException(num_to_parse, to_parse, "unsigned long", mode);
         }
 
         // Compute the value of this number
         unsigned long value = ((unsigned long)(c - '0')) * times;
 
         // Check if an overflow for result would occur
-        if (result > UINT32_MAX - value) {
-            throw OverflowException(num_to_parse, to_parse, "uint", mode);
+        if (sign > 0 && result > INT_MAX - value) {
+            throw OverflowException(num_to_parse, to_parse, "int", mode);
         }
+        if (sign < 0 && result > INT_MAX - value + 1) {
+            throw UnderflowException("-" + num_to_parse, to_parse, "int", mode);
+        }
+        
 
         // Finally, add the value to the result
         result += value;
