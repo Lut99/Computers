@@ -9,32 +9,51 @@
 #include <sstream>
 
 #include "../support/LinkedList.h"
+#include "../support/StringConverter.cpp"
 #include "Chaos1_0.h"
 
 using namespace std;
 
 /* INSTRUCTION PARSERS HELPERS */
 /* Parses '$regX', '<regX' or '0xXX' syntax. The int returned specifies which of the versions it is (0=register, 1=memory and 2 is constant), and the value integer becomes the register or memory address, respectively, or in the last case the constant value. If -1 is returned, then an error happened, of which the error code is specified in the value variable. */
-int tool_reg(string arg, int& value) {
+int tool_reg(string arg, unsigned long& value) {
     // Try to see if it's a memory or register value
-    if (arg[0] == '$') {
-        // Try to parse as registry memory value
+    if (arg[0] == '$' || arg[0] == '<') {
+        // Try to parse as registry value
         if (arg[1] != 'r' or arg[2] != 'e' or arg[3] != 'g') {
             // Return 'registry syntax error'
             value = -1;
             return -1;
         }
-        int reg = std::stoi(arg.substr(4));
-    } else if (arg[0] == '<') {
-        // Try to parse as registry memory value
-        if (arg[1] != 'r' or arg[2] != 'e' or arg[3] != 'g') {
-            // Return 'registry syntax error'
-            value = -1;
-            return -1;
+
+        // Fetch the register number
+        char reg;
+        try {
+            reg = StringConverter::toInteger<char>(arg.substr(4));
+        } catch (StringConverter::StringConvertionException& e) {
+            // Show as parse error
+            cerr << "Invalid register number \"" << arg.substr(4) << "\": Must be an integer ranging 0-15" << endl;
+            exit(1);
         }
-    } else {
-        // Try to parse as constant
+
+        // Also throw error if out-of-bounds
+        if (reg < 0 || reg > 15) {
+            cerr << "Invalid register number \"" << arg.substr(4) << "\": Must be an integer ranging 0-15" << endl;
+            exit(1);
+        }
+
+        // Cool, now return that as value and mark the appropriate type
+        value = (unsigned long) reg;
+        if (arg[0] == '$') {
+            return 0;
+        }
+        return 1;
+    } else if (argp[0]) {
+
     }
+    // No known format
+    cerr << "Unknown register or constant \"" << arg << "\"" << endl;
+    exit(1);
 }
 
 /* INSTRUCTION PARSERS */
