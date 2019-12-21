@@ -93,22 +93,8 @@ namespace StringConverter {
             {}
     };
 
-    /* Converts the value in a string to an unsigned char. If it fails, an appropriate derivation of StringConvertionException is thrown. */
-    unsigned char toUChar(std::string to_parse, StringConverterMode mode = NoForgiveness);
-    /* Converts the value in a string to a signed char. If it fails, an appropriate derivation of StringConvertionException is thrown. */
-    char toChar(std::string to_parse, StringConverterMode mode = NoForgiveness);
-    /* Converts the value in a string to an unsigned short. If it fails, an appropriate derivation of StringConvertionException is thrown. */
-    unsigned short toUShort(std::string to_parse, StringConverterMode mode = NoForgiveness);
-    /* Converts the value in a string to a signed short. If it fails, an appropriate derivation of StringConvertionException is thrown. */
-    short toShort(std::string to_parse, StringConverterMode mode = NoForgiveness);
-    /* Converts the value in a string to an unsigned int. If it fails, an appropriate derivation of StringConvertionException is thrown. */
-    unsigned int toUInt(std::string to_parse, StringConverterMode mode = NoForgiveness);
-    /* Converts the value in a string to a signed int. If it fails, an appropriate derivation of StringConvertionException is thrown. */
-    int toInt(std::string to_parse, StringConverterMode mode = NoForgiveness);
-    /* Converts the value in a string to an unsigned long. If it fails, an appropriate derivation of StringConvertionException is thrown. */
-    unsigned long toULong(std::string to_parse, StringConverterMode mode = NoForgiveness);
-    /* Converts the value in a string to a signed long. If it fails, an appropriate derivation of StringConvertionException is thrown. */
-    long toLong(std::string to_parse, StringConverterMode mode = NoForgiveness);
+    /* Converts the value in a string to a numerical value. If it fails, an appropriate derivation of StringConvertionException is thrown. */
+    template <typename T> T toInteger(std::string to_parse, StringConverterMode mode = NoForgiveness);
 }
 
 #endif

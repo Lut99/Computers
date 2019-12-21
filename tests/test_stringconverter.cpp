@@ -8,7 +8,7 @@
 #include <iostream>
 #include <limits.h>
 
-#include "../src/support/StringConverter.h"
+#include "../src/support/StringConverter.cpp"
 
 using namespace std;
 
@@ -20,7 +20,7 @@ bool test_uint(string msg, int expected_result, unsigned int expected, string to
     cout << "  Parsing..." << endl;
     unsigned int result;
     try {
-        result = StringConverter::toUInt(to_parse, mode);
+        result = StringConverter::toInteger<unsigned int>(to_parse, mode);
     } catch (StringConverter::IllegalCharacterException e) {
         cout << "  IllegalCharacterException: " << e.msg << endl;
         if (expected_result == -1) {
@@ -67,7 +67,7 @@ bool test_int(string msg, int expected_result, int expected, string to_parse, St
     cout << "  Parsing..." << endl;
     int result;
     try {
-        result = StringConverter::toInt(to_parse, mode);
+        result = StringConverter::toInteger<int>(to_parse, mode);
     } catch (StringConverter::IllegalCharacterException e) {
         cout << "  IllegalCharacterException: " << e.msg << endl;
         if (expected_result == -1) {
@@ -199,6 +199,32 @@ int main () {
     }
     sstr << (INT_MAX - (INT_MAX / 10 * 10) + 2);
     if (!test_int("Overflow (just yes, negative) case", -4, 0, sstr.str())) {
+        return 1;
+    }
+
+    /* Finally, some tests regarding the different modes. */
+    if (!test_int("NoForgiveness w/spaces case", -1, 0, "  657 4887 ")) {
+        return 1;
+    }
+    if (!test_int("AllowSpaces w/spaces case", 1, 6574887, "  657 4887 ", StringConverter::AllowSpaces)) {
+        return 1;
+    }
+    if (!test_int("ParseFirst w/spaces case", 1, 657, "  657 4887 ", StringConverter::ParseFirstNumber)) {
+        return 1;
+    }
+    if (!test_int("ParseLast w/spaces case", 1, 4887, "  657 4887 ", StringConverter::ParseLastNumber)) {
+        return 1;
+    }
+    if (!test_int("NoForgiveness w/chars case", -1, 0, "  657aa 4887 !")) {
+        return 1;
+    }
+    if (!test_int("AllowSpaces w/chars case", -1, 0, "  657aa 4887 !", StringConverter::AllowSpaces)) {
+        return 1;
+    }
+    if (!test_int("ParseFirst w/chars case", 1, 657, "  657aa 4887 !", StringConverter::ParseFirstNumber)) {
+        return 1;
+    }
+    if (!test_int("ParseLast w/chars case", 1, 4887, "  657aa 4887 !", StringConverter::ParseLastNumber)) {
         return 1;
     }
 }
