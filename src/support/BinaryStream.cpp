@@ -17,9 +17,14 @@ using namespace std;
 using namespace DataTypes;
 
 /* BINARY STRINGS */
-BinaryString::BinaryString(char *data_string, int data_size) {
+BinaryString::BinaryString(char *data_string, std::size_t data_size) {
     // Simply set these as values
     this->data = data_string;
+    this->size = data_size;
+}
+BinaryString::BinaryString(void *data_string, std::size_t data_size) {
+    // Reinterpret cast the void*
+    this->data = static_cast<char*>(data_string);
     this->size = data_size;
 }
 BinaryString::BinaryString(char *null_terminated_string) {
@@ -33,20 +38,16 @@ BinaryString::BinaryString(char *null_terminated_string) {
             break;
         }
     }
-    if (this->size == INT_MAX) {
-        // Not found, so set to NULL and size to -1
-        this->data = NULL;
-        this->size = -1;
-    } else {
-        // Add an additional size to account for the '\0' itself
-        this->size++;
-    }
+    // Add an additional count for '\0' itself
+    this->size++;
 }
 
 /* BINARY STREAM */
 BinaryStream::BinaryStream(std::size_t initial_size=256) {
     this->size = 0;
-    this->binary_string = new char[this->size];
+    this->init_size = initial_size;
+    this->real_size = initial_size;
+    this->binary_string = new char[this->real_size];
 }
 BinaryStream::~BinaryStream() {
     delete[] this->binary_string;
@@ -79,10 +80,14 @@ const std::size_t BinaryStream::length() const {
 void BinaryStream::clear() {
     delete[] this->binary_string;
     this->size = 0;
-    this->binary_string = new char[this->size];
+    this->real_size = this->init_size;
+    this->binary_string = new char[this->real_size];
 }
 
 /* STREAM OPERATORS */
-BinaryStream& operator<<(BinaryStream& bs, const unsigned char& value) {
-
+BinaryStream& DataTypes::operator<<(BinaryStream& bs, const unsigned char value) {
+    // Re-interpret cast to char, then add to the stream
+    char data[1];
+    data[0] = (char) value;
+    bs.append(data, 1);
 }

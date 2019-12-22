@@ -12,10 +12,13 @@
 namespace DataTypes {
     struct BinaryString {
         char *data;
-        int size;
+        std::size_t size;
 
         /* Create a BinaryString object by ptr and size. Note: does nothing about allocation or deallocation. */
-        BinaryString(char *data_string, int data_size);
+        BinaryString(char *data_string, std::size_t data_size);
+
+        /* Create a BinaryString object by void ptr and size. Note: does nothing about allocation or deallocation. */
+        BinaryString(void *data_string, std::size_t data_size);
 
         /* Create a BinaryString object by providing a null-terminated char*. Note: does nothing about allocation or deallocation. */
         BinaryString(char *null_terminated_string);
@@ -26,9 +29,10 @@ namespace DataTypes {
             char *binary_string;
             std::size_t size;
             std::size_t real_size;
+            std::size_t init_size;
 
             /* Appends n characters to the internal array, which is resized automatically. To be dynamic, the actual size is often higher than the contents. */
-
+            void append(char *data, std::size_t n);
         public:
             /* The BinaryStream class makes constructing BinaryStreams easier. Simply use the '<<' operator to add various types of data. You can also define such an operator yourself by using '<< BinaryString' to add binary data yourself. */
             BinaryStream(std::size_t initial_size=256);
@@ -47,7 +51,7 @@ namespace DataTypes {
 
             /* Declares the necessary << operators as friends. */
             /* Appends unsigned chars to the stream */
-            friend BinaryStream& operator<<(BinaryStream& bs, const unsigned char& value);
+            friend BinaryStream& operator<<(BinaryStream& bs, const unsigned char value);
             /* Appends chars to the stream */
             /* Appends unsigned shorts to the stream */
             /* Appends shorts to the stream */
@@ -60,7 +64,7 @@ namespace DataTypes {
             /* Allows the binarystream to be appended to an ostream */
     };
 
-    BinaryStream& operator<<(BinaryStream& bs, const unsigned char& value);
+    BinaryStream& operator<<(BinaryStream& bs, const unsigned char value);
 }
 
 #endif
