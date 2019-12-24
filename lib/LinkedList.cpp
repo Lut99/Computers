@@ -11,7 +11,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "LinkedList.h"
+#include "../include/LinkedList.h"
 
 using namespace std;
 using namespace DataTypes;

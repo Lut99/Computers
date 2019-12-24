@@ -1,4 +1,4 @@
-/* TYPES.g
+/* TYPES.h
 *    by tHE iNCREDIBLE mACHINE
 *
 *  A file that contains general type definitions and constants for the computer.

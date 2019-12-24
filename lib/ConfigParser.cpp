@@ -5,7 +5,7 @@
 *  can easily read this map to obtain the required results.
 **/
 
-#include "ConfigParser.h"
+#include "../include/ConfigParser.h"
 
 #include <iostream>
 #include <sstream>

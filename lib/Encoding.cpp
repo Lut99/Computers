@@ -5,8 +5,7 @@
 *              bytes as other formats and back.
 **/
 
-#include <iostream>
-#include "Encoding.h"
+#include "../include/Encoding.h"
 
 /* 8-bit */
 void Enc::encode(char *result, char number) {

@@ -12,7 +12,7 @@
 #include <map>
 
 #include "Limits.cpp"
-#include "StringConverter.h"
+#include "../include/StringConverter.h"
 
 template <typename T> T StringConverter::toInteger(std::string to_parse, StringConverterMode mode) {
     // Preparse the string to find the actual number, as specified by the mode

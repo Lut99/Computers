@@ -5,7 +5,7 @@
 *  compared to another one.
 **/
 
-#include "Version.h"
+#include "../include/Version.h"
 
 Computer::Version::Version(char major, char minor, char tiny)
     : major(major),

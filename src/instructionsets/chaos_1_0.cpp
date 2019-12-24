@@ -7,8 +7,8 @@
 
 #include <iostream>
 
-#include "../support/Encoding.h"
-#include "../support/Errors.h"
+#include "../../include/Encoding.h"
+#include "../../include/Errors.h"
 #include "chaos_1_0.h"
 
 using namespace Computer;
