@@ -163,6 +163,12 @@ BinaryStream& DataTypes::operator<<(BinaryStream& bs, const long& value) {
     Enc::encode(data, value);
     bs.append(data, 8);
 }
+BinaryStream& DataTypes::operator<<(BinaryStream& bs, const char *value) {
+    // Count how many elements are in this zero-terminated string
+    std::size_t count = 1;
+    for (; value[count] != '\0'; count++) {}
+    bs.append(value, count);
+}
 BinaryStream& DataTypes::operator<<(BinaryStream& bs, const std::string& value) {
     // Append the inner string
     bs.append(value.c_str(), value.length());
@@ -174,4 +180,11 @@ BinaryStream& DataTypes::operator<<(BinaryStream& bs, const BinaryString& value)
 BinaryStream& DataTypes::operator<<(BinaryStream& bs, const BinaryStream& value) {
     // Append the second stream's contents to the first
     bs.append(value.binary_string, value.size);
+}
+std::ostream& DataTypes::operator<<(std::ostream& os, const BinaryStream& bs) {
+    // Append each character of the bs array
+    for (int i = 0; i < bs.length(); i++) {
+        os << bs.binary_string[i];
+    }
+    return os;
 }

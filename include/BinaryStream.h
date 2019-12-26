@@ -68,26 +68,31 @@ namespace DataTypes {
             friend BinaryStream& operator<<(BinaryStream& bs, const unsigned long& value);
             /* Appends longs to the stream */
             friend BinaryStream& operator<<(BinaryStream& bs, const long& value);
+            /* Appends a zero-terminated string to the stream */
+            friend BinaryStream& operator<<(BinaryStream& bs, const char *value);
             /* Appends strings to the stream */
             friend BinaryStream& operator<<(BinaryStream& bs, const std::string& value);
             /* Appends BinaryStrings to the stream */
             friend BinaryStream& operator<<(BinaryStream& bs, const BinaryString& value);
             /* Appends one binary stream to the other */
             friend BinaryStream& operator<<(BinaryStream& bs, const BinaryStream& value);
+            /* Appends this binarystream to an ostream */
+            friend std::ostream& operator<<(std::ostream& os, const BinaryStream& bs);
     };
 
-    /* Test */
-    BinaryStream& operator<<(BinaryStream& bs, const unsigned char value);
-    BinaryStream& operator<<(BinaryStream& bs, const char value);
-    BinaryStream& operator<<(BinaryStream& bs, const unsigned short value);
-    BinaryStream& operator<<(BinaryStream& bs, const short value);
-    BinaryStream& operator<<(BinaryStream& bs, const unsigned int value);
-    BinaryStream& operator<<(BinaryStream& bs, const int value);
-    BinaryStream& operator<<(BinaryStream& bs, const unsigned long value);
-    BinaryStream& operator<<(BinaryStream& bs, const long value);
-    BinaryStream& operator<<(BinaryStream& bs, const std::string value);
-    BinaryStream& operator<<(BinaryStream& bs, const BinaryString value);
-    BinaryStream& operator<<(BinaryStream& bs, const BinaryStream value);
+    BinaryStream& operator<<(BinaryStream& bs, const unsigned char& value);
+    BinaryStream& operator<<(BinaryStream& bs, const char& value);
+    BinaryStream& operator<<(BinaryStream& bs, const unsigned short& value);
+    BinaryStream& operator<<(BinaryStream& bs, const short& value);
+    BinaryStream& operator<<(BinaryStream& bs, const unsigned int& value);
+    BinaryStream& operator<<(BinaryStream& bs, const int& value);
+    BinaryStream& operator<<(BinaryStream& bs, const unsigned long& value);
+    BinaryStream& operator<<(BinaryStream& bs, const long& value);
+    BinaryStream& operator<<(BinaryStream& bs, const char *value);
+    BinaryStream& operator<<(BinaryStream& bs, const std::string& value);
+    BinaryStream& operator<<(BinaryStream& bs, const BinaryString& value);
+    BinaryStream& operator<<(BinaryStream& bs, const BinaryStream& value);
+    std::ostream& operator<<(std::ostream& os, const BinaryStream& bs);
 }
 
 #endif
