@@ -9,6 +9,7 @@
 *  character array to the internal one.
 **/
 
+#include <iostream>
 #include <limits.h>
 
 #include "../include/Encoding.h"
@@ -60,6 +61,7 @@ void BinaryStream::append(const char *data, const std::size_t n) {
     // STEP 1: Resize to the new value. Note that this throws an error if
     //         memory allocation is not possible.
     while (this->size + n > this->real_size) {
+        std::cout << "One resize, coming up" << std::endl;
         // Allocate new memory space
         std::size_t new_real_size = (std::size_t) (this->real_size * RESIZE_FACTOR);
         char *new_binary_string = new char[new_real_size];
