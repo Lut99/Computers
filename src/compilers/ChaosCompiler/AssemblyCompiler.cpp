@@ -7,5 +7,17 @@
 *  back to a file.
 **/
 
+#include "../../../include/Errors.h"
 #include "AssemblyCompiler.h"
 
+using namespace Compiler;
+
+AssemblyCompiler::AssemblyCompiler(std::string compiler_name, std::string compiler_id)
+    :name(compiler_name),
+    id(compiler_id)
+{}
+
+void AssemblyCompiler::compile(DataTypes::BinaryStream& result, std::string line) const {
+    // Throw not-implemented error
+    throw Computer::NoOverrideException("AssemblyCompiler::compile");
+}

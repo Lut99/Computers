@@ -16,12 +16,12 @@
 #include <cerrno>
 #include <cstring>
 
-#include "Chaos1_0.h"
+#include "AssemblyCompiler.h"
 
 using namespace std;
 using namespace Compiler;
 
-typedef void (*CompileFunction)(ifstream&, ofstream&, bool);
+struct 
 
 int main(int argc, char **argv) {
     string ARG_SOURCE_FILE = "";

@@ -23,11 +23,15 @@ namespace Computer {
             {}
     };
 
-    class NoOverrideException : public HardwareException {
+    class NoOverrideException : public std::exception {
         public:
+            const std::string function_name;
+            const std::string msg;
             /* Exception for when a virtual class isn't overridden */
             NoOverrideException(const std::string func_name)
-                : HardwareException("unknown", "Function \"" + func_name + "\" isn't overridden by child class.")
+                : std::exception(),
+                function_name(func_name),
+                msg("Function \"" + func_name + "\" isn't overridden by child class.")
             {}
     };
 
