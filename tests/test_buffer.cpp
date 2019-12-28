@@ -1,0 +1,102 @@
+/* TEST_BUFFER.cpp
+*    by tHE iNCREDIBLE mACHINE
+*
+*  A test file for Buffer.cpp.
+**/
+
+#include <iostream>
+#include <pthread.h>
+#include <chrono>
+#include <thread>
+
+#include "../lib/Buffer.cpp"
+
+using namespace std;
+using namespace DataTypes;
+
+/* Struct for the thread arguments. */
+struct ThreadArgs {
+    pthread_t id;
+    Buffer<int> *buffer;
+};
+
+/* Generates a stream of numbers and pushes this to the thread. Notifies the user when it writes. Will have a hiccup (sleep) while writing somewhere down the line. */
+void *thread_1(void *arg) {
+    cout << "  Created thread 1" << endl;
+    cout.flush();
+
+    Buffer<int> *buff = ((ThreadArgs*) arg)->buffer;
+
+    for (int i = 0; i < 10000; i++) {
+        // Do a sleep somewhere
+        if (i == 666) {
+            std::this_thread::sleep_for(std::chrono::seconds(10));
+        }
+
+        // Wait until we can write
+        while (!buff->can_write()) {}
+        // Write something
+        buff->write(i);
+    }
+    cout << "  Thread 1 is finished." << endl;
+    cout.flush();
+
+    return NULL;
+}
+/* Reads a stream of numbers and pushes that to the stdout. Will have a hiccup (sleep) while reading somewhere down the line. */
+void *thread_2(void *arg) {
+    cout << "  Created thread 2" << endl;
+    cout.flush();
+
+    Buffer<int> *buff = ((ThreadArgs*) arg)->buffer;
+
+    for (int i = 0; i < 10000; i++) {
+        // Do a sleep somewhere else
+        if (i == 6666) {
+            std::this_thread::sleep_for(std::chrono::seconds(10));
+        }
+        
+        // Wait until we can read
+        while (!buff->can_read()) {}
+        // Read to the cout
+        int result;
+        buff->read(result);
+        cout << "  " << result << endl;
+        cout.flush();
+    }
+    cout << "  Thread 2 is finished." << endl;
+    cout.flush();
+
+    return NULL;
+}
+
+bool test() {
+    cout << "Testing normal use case..." << endl;
+
+    cout << "  Initializing buffer..." << endl;
+    Buffer<int> buffer = Buffer<int>(16);
+
+    cout << "  Creating first test thread..." << endl;
+    ThreadArgs args1;
+    args1.buffer = &buffer;
+    pthread_create(&args1.id, NULL, thread_1, (void*) &args1);
+
+    cout << "  Creating second test thread..." << endl;
+    ThreadArgs args2;
+    args2.buffer = &buffer;
+    pthread_create(&args2.id, NULL, thread_2, (void*) &args2);
+
+    // Let the two threads join
+    pthread_join(args1.id, NULL);
+    pthread_join(args2.id, NULL);
+
+    cout << "Success" << endl;
+
+    return true;
+}
+
+
+int main() {
+    cout << endl << "### TEST for \"Instruction.cpp\" ###" << endl << endl;
+    test();
+}
