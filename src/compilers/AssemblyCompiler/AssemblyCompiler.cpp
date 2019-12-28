@@ -17,7 +17,7 @@ AssemblyCompiler::AssemblyCompiler(std::string compiler_name, std::string compil
     id(compiler_id)
 {}
 
-void AssemblyCompiler::compile(DataTypes::BinaryStream& result, std::string line) const {
+void AssemblyCompiler::compile(DataTypes::BinaryStream& result, std::string line) {
     // Throw not-implemented error
     throw Computer::NoOverrideException("AssemblyCompiler::compile");
 }

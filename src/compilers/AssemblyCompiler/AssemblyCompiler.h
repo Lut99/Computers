@@ -21,10 +21,7 @@ namespace Compiler {
             AssemblyCompiler(std::string compiler_name, std::string compiler_id);
 
             /* The assemble step of the pipeline. Takes a line from the file, determines what the correct operator is and outputs a the result in the given binarystream. Note that this function should be allowed to throw errors by itself (non-catchable). */
-            virtual void compile(DataTypes::BinaryStream& result, std::string line) const;
-
-            /* A static factory class that can be overridden by child classes to create the proper type. Note that the compiler should be destroyed later on. */
-            virtual AssemblyCompiler *get_compiler() const;
+            virtual void compile(DataTypes::BinaryStream& result, std::string line);
     };
 }
 
