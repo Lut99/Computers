@@ -10,6 +10,7 @@
 **/
 
 #include <iostream>
+#include <sstream>
 #include <limits.h>
 
 #include "../include/Encoding.h"
@@ -61,7 +62,6 @@ void BinaryStream::append(const char *data, const std::size_t n) {
     // STEP 1: Resize to the new value. Note that this throws an error if
     //         memory allocation is not possible.
     while (this->size + n > this->real_size) {
-        std::cout << "One resize, coming up" << std::endl;
         // Allocate new memory space
         std::size_t new_real_size = (std::size_t) (this->real_size * RESIZE_FACTOR);
         char *new_binary_string = new char[new_real_size];
@@ -80,7 +80,6 @@ void BinaryStream::append(const char *data, const std::size_t n) {
     // STEP 2: Copy the contents to the internal array
     for (int i = 0; i < n; i++) {
         this->binary_string[this->size + i] = data[i];
-        std::cout << "New element: '" << ((int) this->binary_string[this->size + i]) << "' @ " << (this->size + i) << std::endl;
     }
 
     // STEP 3: Update the size variable
@@ -118,15 +117,28 @@ void BinaryStream::clear() {
     this->binary_string = new char[this->real_size];
 }
 
+std::string BinaryStream::to_string() {
+    stringstream sstr;
+    sstr << "[";
+    for (std::size_t i = 0; i < this->size; i++) {
+        if (i > 0) {
+            sstr << ",";
+        }
+        sstr << ((int) this->binary_string[i]);
+    }
+    sstr << "]";
+    return sstr.str();
+}
+
 /* ADD OVERLOADS */
-BinaryStream& BinaryStream::add(const unsigned char& value) {
+BinaryStream& BinaryStream::add(const unsigned char value) {
     // Re-interpret cast to char, then add to the stream
     char data[1];
     Enc::encode(data, value);
     this->append(data, 1);
     return *this;
 }
-BinaryStream& BinaryStream::add(const int& value) {
+BinaryStream& BinaryStream::add(const int value) {
     // Make use of Encoding.h to covert this to a binary string
     char data[4];
     Enc::encode(data, value);
@@ -140,7 +152,7 @@ BinaryStream& BinaryStream::add(const char *value) {
     this->append(value, count);
     return *this;
 }
-BinaryStream& BinaryStream::add(const std::string& value) {
+BinaryStream& BinaryStream::add(const std::string value) {
     // Append the inner string
     this->append(value.c_str(), value.length());
     return *this;
@@ -148,54 +160,54 @@ BinaryStream& BinaryStream::add(const std::string& value) {
 
 /* STREAM OPERATORS */
 
-BinaryStream& DataTypes::operator<<(BinaryStream& bs, const unsigned char& value) {
+BinaryStream& DataTypes::operator<<(BinaryStream& bs, const unsigned char value) {
     // Re-interpret cast to char, then add to the stream
     char data[1];
     data[0] = (char) value;
     bs.append(data, 1);
     return bs;
 }
-BinaryStream& DataTypes::operator<<(BinaryStream& bs, const char& value) {
+BinaryStream& DataTypes::operator<<(BinaryStream& bs, const char value) {
     // No need to do anything, just append it
     bs.append(&value, 1);
     return bs;
 }
-BinaryStream& DataTypes::operator<<(BinaryStream& bs, const unsigned short& value) {
+BinaryStream& DataTypes::operator<<(BinaryStream& bs, const unsigned short value) {
     // Make use of Encoding.h to covert this to a binary string
     char data[2];
     Enc::encode(data, value);
     bs.append(data, 2);
     return bs;
 }
-BinaryStream& DataTypes::operator<<(BinaryStream& bs, const short& value) {
+BinaryStream& DataTypes::operator<<(BinaryStream& bs, const short value) {
     // Make use of Encoding.h to covert this to a binary string
     char data[2];
     Enc::encode(data, value);
     bs.append(data, 2);
     return bs;
 }
-BinaryStream& DataTypes::operator<<(BinaryStream& bs, const unsigned int& value) {
+BinaryStream& DataTypes::operator<<(BinaryStream& bs, const unsigned int value) {
     // Make use of Encoding.h to covert this to a binary string
     char data[4];
     Enc::encode(data, value);
     bs.append(data, 4);
     return bs;
 }
-BinaryStream& DataTypes::operator<<(BinaryStream& bs, const int& value) {
+BinaryStream& DataTypes::operator<<(BinaryStream& bs, const int value) {
     // Make use of Encoding.h to covert this to a binary string
     char data[4];
     Enc::encode(data, value);
     bs.append(data, 4);
     return bs;
 }
-BinaryStream& DataTypes::operator<<(BinaryStream& bs, const unsigned long& value) {
+BinaryStream& DataTypes::operator<<(BinaryStream& bs, const unsigned long value) {
     // Make use of Encoding.h to covert this to a binary string
     char data[8];
     Enc::encode(data, value);
     bs.append(data, 8);
     return bs;
 }
-BinaryStream& DataTypes::operator<<(BinaryStream& bs, const long& value) {
+BinaryStream& DataTypes::operator<<(BinaryStream& bs, const long value) {
     // Make use of Encoding.h to covert this to a binary string
     char data[8];
     Enc::encode(data, value);
@@ -209,22 +221,22 @@ BinaryStream& DataTypes::operator<<(BinaryStream& bs, const char *value) {
     bs.append(value, count);
     return bs;
 }
-BinaryStream& DataTypes::operator<<(BinaryStream& bs, const std::string& value) {
+BinaryStream& DataTypes::operator<<(BinaryStream& bs, const std::string value) {
     // Append the inner string
     bs.append(value.c_str(), value.length());
     return bs;
 }
-BinaryStream& DataTypes::operator<<(BinaryStream& bs, const BinaryString& value) {
+BinaryStream& DataTypes::operator<<(BinaryStream& bs, const BinaryString value) {
     // Append the binary string's characters
     bs.append(value.data, value.size);
     return bs;
 }
-BinaryStream& DataTypes::operator<<(BinaryStream& bs, const BinaryStream& value) {
+BinaryStream& DataTypes::operator<<(BinaryStream& bs, const BinaryStream value) {
     // Append the second stream's contents to the first
     bs.append(value.binary_string, value.size);
     return bs;
 }
-std::ostream& DataTypes::operator<<(std::ostream& os, const BinaryStream& bs) {
+std::ostream& DataTypes::operator<<(std::ostream& os, const BinaryStream bs) {
     // Append each character of the bs array
     for (int i = 0; i < bs.length(); i++) {
         os << bs.binary_string[i];
