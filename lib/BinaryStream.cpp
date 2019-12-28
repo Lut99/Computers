@@ -130,34 +130,6 @@ std::string BinaryStream::to_string() {
     return sstr.str();
 }
 
-/* ADD OVERLOADS */
-BinaryStream& BinaryStream::add(const unsigned char value) {
-    // Re-interpret cast to char, then add to the stream
-    char data[1];
-    Enc::encode(data, value);
-    this->append(data, 1);
-    return *this;
-}
-BinaryStream& BinaryStream::add(const int value) {
-    // Make use of Encoding.h to covert this to a binary string
-    char data[4];
-    Enc::encode(data, value);
-    this->append(data, 4);
-    return *this;
-}
-BinaryStream& BinaryStream::add(const char *value) {
-    // Count how many elements are in this zero-terminated string
-    std::size_t count = 1;
-    for (; value[count] != '\0'; count++) {}
-    this->append(value, count);
-    return *this;
-}
-BinaryStream& BinaryStream::add(const std::string value) {
-    // Append the inner string
-    this->append(value.c_str(), value.length());
-    return *this;
-}
-
 /* STREAM OPERATORS */
 
 BinaryStream& DataTypes::operator<<(BinaryStream& bs, const unsigned char value) {

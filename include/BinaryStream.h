@@ -53,12 +53,6 @@ namespace DataTypes {
             /* Returns a string representing the contents of the stream */
             std::string to_string();
 
-            /* The add operator appends various datatypes to the inner binarystream. */
-            BinaryStream& add(const unsigned char value);
-            BinaryStream& add(const int value);
-            BinaryStream& add(const char* value);
-            BinaryStream& add(const std::string value);
-
             /* Declare the necessary << operators as friends. */
             
             /* Appends unsigned chars to the stream */
