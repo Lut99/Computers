@@ -22,6 +22,11 @@ using namespace std;
 using namespace DataTypes;
 
 /* BINARY STRINGS */
+BinaryString::BinaryString() {
+    // Set the data to NULL and the size to 0
+    this->data = NULL;
+    this->size = 0;
+}
 BinaryString::BinaryString(char *data_string, std::size_t data_size) {
     // Simply set these as values
     this->data = data_string;

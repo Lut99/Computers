@@ -15,6 +15,9 @@ namespace DataTypes {
         char *data;
         std::size_t size;
 
+        /* Create an empty BinaryString object. */
+        BinaryString();
+
         /* Create a BinaryString object by ptr and size. Note: does nothing about allocation or deallocation. */
         BinaryString(char *data_string, std::size_t data_size);
 
