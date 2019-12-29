@@ -18,6 +18,7 @@ using namespace DataTypes;
 struct ThreadArgs {
     pthread_t id;
     Buffer<int> *buffer;
+    bool done;
 };
 
 /* Generates a stream of numbers and pushes this to the thread. Notifies the user when it writes. Will have a hiccup (sleep) while writing somewhere down the line. */
@@ -27,19 +28,21 @@ void *thread_1(void *arg) {
 
     Buffer<int> *buff = ((ThreadArgs*) arg)->buffer;
 
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 50; i++) {
         // Do a sleep somewhere
-        if (i == 666) {
+        if (i == 6) {
             std::this_thread::sleep_for(std::chrono::seconds(10));
         }
 
         // Wait until we can write
-        while (!buff->can_write()) {}
-        // Write something
-        buff->write(i);
+        while (!buff->write(i)) {}
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     cout << "  Thread 1 is finished." << endl;
     cout.flush();
+
+    ((ThreadArgs*) arg)->done = true;
 
     return NULL;
 }
@@ -50,22 +53,33 @@ void *thread_2(void *arg) {
 
     Buffer<int> *buff = ((ThreadArgs*) arg)->buffer;
 
-    for (int i = 0; i < 10000; i++) {
-        // Do a sleep somewhere else
-        if (i == 6666) {
+    for (int i = 0; i < 50; i++) {
+        // Do a longer sleep somewhere else
+        if (i == 66) {
             std::this_thread::sleep_for(std::chrono::seconds(10));
         }
         
         // Wait until we can read
-        while (!buff->can_read()) {}
+        int result = -1;
+        if (!buff->read(result)) {
+            //cout << "Thread 2 is waiting..." << endl;
+            while (true) {
+                bool can_continue = buff->read(result);
+                //cout << "Can we continue? " << can_continue << endl;
+                if (can_continue) {
+                    break;
+                }
+            }
+            //cout << "Thread 2 is done waiting." << endl;
+        }
         // Read to the cout
-        int result;
-        buff->read(result);
-        cout << "  " << result << endl;
-        cout.flush();
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     cout << "  Thread 2 is finished." << endl;
     cout.flush();
+
+    ((ThreadArgs*) arg)->done = true;
 
     return NULL;
 }
@@ -79,14 +93,20 @@ bool test() {
     cout << "  Creating first test thread..." << endl;
     ThreadArgs args1;
     args1.buffer = &buffer;
+    args1.done = false;
     pthread_create(&args1.id, NULL, thread_1, (void*) &args1);
 
     cout << "  Creating second test thread..." << endl;
     ThreadArgs args2;
     args2.buffer = &buffer;
+    args2.done = false;
     pthread_create(&args2.id, NULL, thread_2, (void*) &args2);
 
     // Let the two threads join
+    while (!args1.done || !args2.done) {
+        cout << buffer.to_string() << endl << "-------------------" << endl << endl;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
     pthread_join(args1.id, NULL);
     pthread_join(args2.id, NULL);
 

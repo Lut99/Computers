@@ -6,6 +6,10 @@
 *  buffer, and one reads from it.
 **/
 
+#include <iostream>
+#include <sstream>
+#include <limits.h>
+
 #include "../include/Buffer.h"
 
 using namespace DataTypes;
@@ -17,10 +21,8 @@ template <class T> Buffer<T>::Buffer(std::size_t size)
     this->buffer = new T[this->size];
 
     // Set the i's to zero.
-    this->next_write = 0;
-    this->last_write = 0;
-    this->next_read = 0;
-    this->last_read = 0;
+    this->start_readable = 0;
+    this->end_readable = 0;
 }
 template <class T> Buffer<T>::~Buffer() {
     delete[] this->buffer;
@@ -31,25 +33,24 @@ template <class T> bool Buffer<T>::write(T elem) {
         return false;
     }
 
-    // Write to next_write
-    this->buffer[this->next_write] = elem;
+    // Increment end_readable
+    std::size_t to_write = this->end_readable + 1;
 
-    // Update last_write to next_write, signalling the other thread to read one more
-    this->last_write = this->next_write;
+    // Write to that zone
+    this->buffer[to_write % this->size] = elem;
 
-    // Update next_write
-    std::size_t new_next_write = this->next_write + 1;
-    if (new_next_write >= this->size) {
-        new_next_write = 0;
-    }
-    this->next_write = new_next_write;
+    // Update the readable var
+    this->end_readable = to_write;
 
     return true;
 }
-template <class T> bool Buffer<T>::can_write() {
+template <class T> bool Buffer<T>::can_write() const {
     // Only returns true if:
-    //   - next_write >= next_read
-    return this->next_write >= this->last_read && this->next_write <= this->next_read;
+    //   - (end_readable - start_readable) >= 0 && (end_readable - start_readable) <= size
+    //   - (end_readable - start_readable) < 0 && (end_readable + (size - start_readable)) <= size
+    std::size_t start = this->start_readable;
+    std::size_t end = this->end_readable;
+    return (end - start >= 0 && end - start < this->size) || (end - start < 0 && end + (this->size - start) < this->size);
 }
 
 template <class T> bool Buffer<T>::read(T& elem) {
@@ -57,23 +58,56 @@ template <class T> bool Buffer<T>::read(T& elem) {
         return false;
     }
 
-    // Write from next_read
-    elem = this->buffer[this->next_read];
+    // Read from the start of the zone
+    elem = this->buffer[this->start_readable % this->size];
 
-    // Update last_read to next_read, signalling the other thread to write one more
-    this->last_read = this->next_read;
-
-    // Update next_read
-    std::size_t new_next_read = this->next_read + 1;
-    if (new_next_read >= this->size) {
-        new_next_read = 0;
-    }
-    this->next_read = new_next_read;
+    // Update the readable var
+    this->start_readable++;
 
     return true;
 }
-template <class T> bool Buffer<T>::can_read() {
+template <class T> bool Buffer<T>::can_read() const {
     // Only returns true if:
-    //   - next_write != next_from
-    return this->next_write != this->next_read;
+    //   - end_readable != start_readable
+    std::size_t start = this->start_readable;
+    std::size_t end = this->end_readable;
+    return start != end;
+}
+
+template <class T> std::string Buffer<T>::to_string() const {
+    const static int bar_length = 50;
+
+    std::size_t start = this->start_readable;
+    std::size_t end = this->end_readable;
+
+    // First, compute the pixel posses
+    int start_pos = (int) ((((start % this->size) / (float) this->size) * bar_length) + 0.5);
+    int end_pos = (int) ((((end % this->size) / (float) this->size) * bar_length) + 0.5);
+
+    // Next, print the three lines
+    std::stringstream start_line;
+    std::stringstream bar_line;
+    std::stringstream end_line;
+    for (int i = 0; i < bar_length; i++) {
+        if (i == start_pos) {
+            start_line << 'v';
+        } else {
+            start_line << ' ';
+        }
+
+        bar_line << '=';
+
+        if (i == end_pos) {
+            end_line << '^';
+        } else {
+            end_line << ' ';
+        }
+    }
+    // Add other text + newlines
+    start_line << " (start = " << start << ")" << std::endl;
+    bar_line << std::endl;
+    end_line << " (end = " << end << ")" << std::endl;
+    
+    // return
+    return start_line.str() + bar_line.str() + end_line.str();
 }
