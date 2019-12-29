@@ -1,5 +1,4 @@
 /* CHAOS ASSEMBLY LANGUAGE v1.0.0 TEST FILE */
-/*
 REG_SET $reg0 15
 REG_SET $reg1 0x10       
 
@@ -7,6 +6,5 @@ REG_SET $reg1 0x10
 
 ADD $reg0         $reg1
 //ADD $reg0 $reg1
-OUT *//* TEEEEEST *//* $reg0
+OUT /* TEEEEEST */ $reg0
 END
-*/

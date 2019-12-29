@@ -31,9 +31,9 @@ using namespace DataTypes;
 /* Keeps track of the dlopen file handle */
 void *compiler_handle;
 /* Used to signal the fetch step of the pipeline is done */
-bool fetch_done;
+int fetch_done;
 /* Used to signal the compile step of the pipeline is done */
-bool compile_done;
+int compile_done;
 
 /* Keeps track of given arguments */
 struct Settings {
@@ -47,27 +47,35 @@ struct Settings {
 /* Argument struct for pipeline 1. */
 struct Pipeline1_Args {
     pthread_t id;
-    fstream *preprocessed_stream;
+    ifstream *preprocessed_stream;
     Buffer<string> *buffer;
 };
 /* PIPELINE 1: This thread reads the preparsed file line-by-line and outputs those in a buffer */
 void* pipeline_in(void *args) {
     Pipeline1_Args *p_args = (Pipeline1_Args*) args;
     
-    fstream *pre = p_args->preprocessed_stream;
+    ifstream *pre = p_args->preprocessed_stream;
     Buffer<string> *buff = p_args->buffer;
 
     // Read line-by-line and, unless they're empty, output them to the next
     //   thread
     string line;
+    int done = 0;
     while (getline(*pre, line)) {
         if (!line.empty()) {
             buff->write(line);
         }
+
+        cout << "Pipeline #1: Got line \"" << line << "\"" << endl;
+
+        // Mark this line as done
+        done++;
     }
 
-    // We're done! Set the boolean so the other threads know nothing's coming
-    fetch_done = true;
+    cout << "Pipeline #1, signing off (did " << done << " items)" << endl;
+
+    // Propagate done
+    fetch_done = done;
 
     return NULL;
 }
@@ -88,12 +96,15 @@ void* pipeline_compile(void *args) {
     AssemblyCompiler *compiler = p_args->compiler;
 
     BinaryStream result;
+    int done = 0;
     while (true) {
         // Wait until we can read
         while (!bin->can_read()) {
             // Stop entirely if there is nothing coming anymore
-            if (fetch_done) {
-                compile_done = true;
+            if (fetch_done == done) {
+                cout << "Pipeline #2, going home (did " << done << " items)" << endl;
+                // Propagate done
+                compile_done = done;
                 return NULL;
             }
         }
@@ -101,6 +112,8 @@ void* pipeline_compile(void *args) {
         // Read the line
         string line;
         bin->read(line);
+
+        cout << "Pipeline #2: Got line \"" << line << "\" from #1" << endl;
 
         // Compile it
         compiler->compile(result, line);
@@ -114,6 +127,9 @@ void* pipeline_compile(void *args) {
 
         // Push the data to the next buffer
         while(!bout->write(to_write)) {}
+
+        // Mark as done
+        done++;
     }
 }
 
@@ -132,17 +148,21 @@ void *pipeline_out(void *args) {
 
     // Read from the buffer until it is empty && nothing is coming anymore
     BinaryString res;
+    int done = 0;
     while (true) {
         // Wait until we can read
         while (!buff->can_read()) {
             // Stop entirely if there is nothing coming anymore
-            if (compile_done) {
+            if (compile_done == done) {
+                cout << "Pipeline #3, sayin' goodbye (did " << done << " items)" << endl;
                 return NULL;
             }
         }
 
         // Actually read
         buff->read(res);
+
+        cout << "Pipeline #3: Got line \"" << res.data << "\" from #2" << endl;
 
         // Send it to the output
         out->write(res.data, res.size);
@@ -274,28 +294,19 @@ AssemblyCompiler *load_compiler(Settings settings, string file_path) {
 }
 
 /* Opens all file handles in a protective way, i.e., upon failing, closes all opened handles so-far. */
-void open_file_handles(ifstream& src, fstream& pre, ofstream& out, Settings settings) {
+void open_file_handles(ifstream& in, string in_path, ofstream& out, string out_path) {
     // Open the source as input file
-    src.open(settings.source_path);
-    if (!src.is_open()) {
-        cerr << "Failed to open source file \"" << settings.source_path << "\":" << endl << strerror(errno) << endl;
+    in.open(in_path);
+    if (!in.is_open()) {
+        cerr << "Failed to open source file \"" << in_path << "\":" << endl << strerror(errno) << endl;
         dlclose(compiler_handle);
         exit(1);
     }
     // Open the preprocess file as both read and write
-    pre.open(settings.source_path + "-preprocess", ios::in | ios::out | ios::trunc);
-    if (!pre.is_open()) {
-        cerr << "Failed to open preprocess file \"" << settings.source_path << "-preprocess" << "\":" << endl << strerror(errno) << endl;
-        src.close();
-        dlclose(compiler_handle);
-        exit(1);
-    }
-    // Open the output file as write file
-    out.open(settings.output_path, ios::out | ios::trunc | ios::binary);
+    out.open(out_path, ios::out | ios::trunc);
     if (!out.is_open()) {
-        cerr << "Failed to open output file \"" << settings.output_path << "\":" << endl << strerror(errno) << endl;
-        src.close();
-        pre.close();
+        cerr << "Failed to open preprocess file \"" << out_path << "\":" << endl << strerror(errno) << endl;
+        in.close();
         dlclose(compiler_handle);
         exit(1);
     }
@@ -303,7 +314,7 @@ void open_file_handles(ifstream& src, fstream& pre, ofstream& out, Settings sett
 }
 
 /* Preprocesses the input file. Returns true or false whether success has been achieved. */
-bool preprocess(ifstream& src, fstream& pre) {
+bool preprocess(ifstream& src, ofstream& pre) {
     string line;
     bool multiline_comment = false;
     while (getline(src, line)) {
@@ -376,31 +387,35 @@ int main(int argc, char **argv) {
 
     // Get handles to both files
     ifstream src;
-    fstream pre;
-    ofstream out;
-    open_file_handles(src, pre, out, settings);
+    ofstream pre;
+    open_file_handles(src, settings.source_path, pre, settings.source_path + "-preprocess");
 
     // Now, preprocess the input file
     if (!preprocess(src, pre)) {
         src.close();
         pre.close();
-        out.close();
         dlclose(compiler_handle);
         exit(1);
     }
-    // We're done with the source, so close that one in any case
+    // We're done with src and pre
     src.close();
+    pre.close();
+
+    // Re-open pre as the read and out as the output this time
+    ifstream pre_2;
+    ofstream out;
+    open_file_handles(pre_2, settings.source_path + "-preprocess", out, settings.output_path);
 
     // Prepare the buffers for the pipelines
     Buffer<string> *input_buffer = new Buffer<string>(256);
     Buffer<BinaryString> *output_buffer = new Buffer<BinaryString>(256);
 
-    fetch_done = false;
-    compile_done = false;
+    fetch_done = -1;
+    compile_done = -1;
 
     /* Launch the first pipeline. */
     Pipeline1_Args args_1;
-    args_1.preprocessed_stream = &pre;
+    args_1.preprocessed_stream = &pre_2;
     args_1.buffer = input_buffer;
     pthread_create(&args_1.id, NULL, pipeline_in, (void*) &args_1);
 
