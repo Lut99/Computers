@@ -17,8 +17,8 @@ Chaos1_0_0_compiler::Chaos1_0_0_compiler()
 {}
 
 void Chaos1_0_0_compiler::compile(DataTypes::BinaryStream& result, std::string line) {
-    // For now, just return 'success' or something
-    result << "success";
+    // For now, just return the received line + '\n' or something
+    result << line << '\n';
 }
 
 AssemblyCompiler *Compiler::compiler_factory() {

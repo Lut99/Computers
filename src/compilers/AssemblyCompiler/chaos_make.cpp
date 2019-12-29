@@ -18,6 +18,7 @@
 #include <cstring>
 #include <pthread.h>
 
+#include "../../../lib/Buffer.cpp"
 #include "AssemblyCompiler.h"
 
 #define INPUT_BUFFER_SIZE 256
@@ -29,7 +30,9 @@ using namespace DataTypes;
 
 /* Keeps track of the dlopen file handle */
 void *compiler_handle;
-/* Used to signal the threads they are done */
+/* Used to signal the fetch step of the pipeline is done */
+bool fetch_done;
+/* Used to signal the compile step of the pipeline is done */
 bool compile_done;
 
 /* Keeps track of given arguments */
@@ -45,33 +48,108 @@ struct Settings {
 struct Pipeline1_Args {
     pthread_t id;
     fstream *preprocessed_stream;
-    string *buffer;
+    Buffer<string> *buffer;
 };
 /* PIPELINE 1: This thread reads the preparsed file line-by-line and outputs those in a buffer */
 void* pipeline_in(void *args) {
     Pipeline1_Args *p_args = (Pipeline1_Args*) args;
     
     fstream *pre = p_args->preprocessed_stream;
-    string *buff = p_args->buffer;
+    Buffer<string> *buff = p_args->buffer;
 
+    // Read line-by-line and, unless they're empty, output them to the next
+    //   thread
+    string line;
+    while (getline(*pre, line)) {
+        if (!line.empty()) {
+            buff->write(line);
+        }
+    }
 
+    // We're done! Set the boolean so the other threads know nothing's coming
+    fetch_done = true;
+
+    return NULL;
 }
 
 /* Argument struct for pipeline 2. */
 struct Pipeline2_Args {
     pthread_t id;
-    string *buffer_in;
-    char **buffer_out;
+    Buffer<string> *buffer_in;
+    Buffer<BinaryString> *buffer_out;
     AssemblyCompiler *compiler;
 };
 /* PIPELINE 2: This thread receives a line from pipeline_in, and outputs the compiled binary to pipeline_out (main thread). */
 void* pipeline_compile(void *args) {
     Pipeline2_Args *p_args = (Pipeline2_Args*) args;
     
-    string *bin = p_args->buffer_in;
-    char **bout = p_args->buffer_out;
+    Buffer<string> *bin = p_args->buffer_in;
+    Buffer<BinaryString> *bout = p_args->buffer_out;
     AssemblyCompiler *compiler = p_args->compiler;
 
+    BinaryStream result;
+    while (true) {
+        // Wait until we can read
+        while (!bin->can_read()) {
+            // Stop entirely if there is nothing coming anymore
+            if (fetch_done) {
+                compile_done = true;
+                return NULL;
+            }
+        }
+
+        // Read the line
+        string line;
+        bin->read(line);
+
+        // Compile it
+        compiler->compile(result, line);
+
+        // Fetch the result
+        char *b_result = new char[result.length()];
+        std::size_t read_size = result.flush(b_result);
+
+        // Create the binarystring
+        BinaryString to_write = BinaryString(b_result, read_size);
+
+        // Push the data to the next buffer
+        while(!bout->write(to_write)) {}
+    }
+}
+
+/* Argument struct for pipeline 3. */
+struct Pipeline3_Args {
+    pthread_t id;
+    ofstream *output_stream;
+    Buffer<BinaryString> *buffer_out;
+};
+/* PIPELINE 3: This thread receives compiled binary strings from the second pipeline, and forwards these to the output file. */
+void *pipeline_out(void *args) {
+    Pipeline3_Args *p_args = (Pipeline3_Args*) args;
+    
+    ofstream *out = p_args->output_stream;
+    Buffer<BinaryString> *buff = p_args->buffer_out;
+
+    // Read from the buffer until it is empty && nothing is coming anymore
+    BinaryString res;
+    while (true) {
+        // Wait until we can read
+        while (!buff->can_read()) {
+            // Stop entirely if there is nothing coming anymore
+            if (compile_done) {
+                return NULL;
+            }
+        }
+
+        // Actually read
+        buff->read(res);
+
+        // Send it to the output
+        out->write(res.data, res.size);
+
+        // Deallocate the internal BinaryString char*
+        delete[] res.data;
+    }
 }
 
 /* Parses the arguments into a Settings struct. */
@@ -213,7 +291,7 @@ void open_file_handles(ifstream& src, fstream& pre, ofstream& out, Settings sett
         exit(1);
     }
     // Open the output file as write file
-    out.open(settings.output_path, ios::out | ios::trunc);
+    out.open(settings.output_path, ios::out | ios::trunc | ios::binary);
     if (!out.is_open()) {
         cerr << "Failed to open output file \"" << settings.output_path << "\":" << endl << strerror(errno) << endl;
         src.close();
@@ -283,6 +361,16 @@ int main(int argc, char **argv) {
     Settings settings;
     parse_arguments(settings, argc, argv);
 
+    // In any case, show a summary
+    cout << "chaos_make -s " << settings.source_path << " -o " << settings.output_path << " -i " << settings.instruction_set_id;
+    if (settings.verbose) {
+        cout << " -v";
+    }
+    if (settings.keep_prepend) {
+        cout << " --keep-prepend";
+    }
+    cout << endl;
+
     // Fetch the compiler
     AssemblyCompiler *compiler = load_compiler(settings, argv[0]);
 
@@ -304,8 +392,11 @@ int main(int argc, char **argv) {
     src.close();
 
     // Prepare the buffers for the pipelines
-    string *input_buffer = new string[INPUT_BUFFER_SIZE];
-    char **output_buffer = new char*[OUTPUT_BUFFER_SIZE];
+    Buffer<string> *input_buffer = new Buffer<string>(256);
+    Buffer<BinaryString> *output_buffer = new Buffer<BinaryString>(256);
+
+    fetch_done = false;
+    compile_done = false;
 
     /* Launch the first pipeline. */
     Pipeline1_Args args_1;
@@ -320,10 +411,22 @@ int main(int argc, char **argv) {
     args_2.compiler = compiler;
     pthread_create(&args_2.id, NULL, pipeline_compile, (void*) &args_2);
 
-    /* Launch the third pipeline (locally). */
-    
+    /* Launch the third pipeline. */
+    Pipeline3_Args args_3;
+    args_3.output_stream = &out;
+    args_3.buffer_out = output_buffer;
+    pthread_create(&args_3.id, NULL, pipeline_out, (void*) &args_3);
 
-    // Done, close the handles
+    // Wait until they're all done
+    pthread_join(args_1.id, NULL);
+    pthread_join(args_2.id, NULL);
+    pthread_join(args_3.id, NULL);
+
+    // Deallocate the buffers
+    delete input_buffer;
+    delete output_buffer;
+
+    // Close the handles
     pre.close();
     out.close();
     dlclose(compiler_handle);

@@ -12,7 +12,7 @@ AssemblyCompiler.so: src/compilers/AssemblyCompiler/AssemblyCompiler.cpp lib/Bin
 chaos_1_0_0_compiler: src/compilers/AssemblyCompiler/languages/Chaos1_0_0.cpp bin/compilers/linux64/AssemblyCompiler.so
 	$(CC) $(ARGS) -fPIC -shared -o bin/compilers/linux64/languages/Chaos1_0_0.so src/compilers/AssemblyCompiler/languages/Chaos1_0_0.cpp bin/compilers/linux64/AssemblyCompiler.so
 chaos_make: src/compilers/AssemblyCompiler/chaos_make.cpp AssemblyCompiler.so
-	$(CC) $(ARGS) -o bin/compilers/linux64/chaos_make src/compilers/AssemblyCompiler/chaos_make.cpp bin/compilers/linux64/AssemblyCompiler.so -ldl
+	$(CC) $(ARGS) -o bin/compilers/linux64/chaos_make src/compilers/AssemblyCompiler/chaos_make.cpp bin/compilers/linux64/AssemblyCompiler.so -ldl -lpthread
 
 LinkedList.o: lib/LinkedList.cpp
 	$(CC) $(ARGS) -o bin/lib/linux64/LinkedList.o -c lib/LinkedList.cpp
