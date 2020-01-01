@@ -183,6 +183,9 @@ void *pipeline_out(void *args) {
 
         // Deallocate the internal BinaryString char*
         delete[] res.data;
+
+        // Mark as done
+        done++;
     }
 }
 
