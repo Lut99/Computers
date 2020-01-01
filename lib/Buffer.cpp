@@ -34,13 +34,13 @@ template <class T> bool Buffer<T>::write(T elem) {
     }
 
     // Increment end_readable
-    std::size_t to_write = this->end_readable + 1;
+    std::size_t to_write = this->end_readable.load() + 1;
 
     // Write to that zone
     this->buffer[to_write % this->size] = elem;
 
     // Update the readable var
-    this->end_readable = to_write;
+    this->end_readable.store(to_write);
 
     return true;
 }
@@ -48,8 +48,8 @@ template <class T> bool Buffer<T>::can_write() const {
     // Only returns true if:
     //   - (end_readable - start_readable) >= 0 && (end_readable - start_readable) <= size
     //   - (end_readable - start_readable) < 0 && (end_readable + (size - start_readable)) <= size
-    std::size_t start = this->start_readable;
-    std::size_t end = this->end_readable;
+    std::size_t start = this->start_readable.load();
+    std::size_t end = this->end_readable.load();
     return (end - start >= 0 && end - start < this->size) || (end - start < 0 && end + (this->size - start) < this->size);
 }
 
@@ -59,26 +59,27 @@ template <class T> bool Buffer<T>::read(T& elem) {
     }
 
     // Read from the start of the zone
-    elem = this->buffer[this->start_readable % this->size];
+    std::size_t read_i = this->start_readable.load();
+    elem = this->buffer[read_i % this->size];
 
     // Update the readable var
-    this->start_readable++;
+    this->start_readable.store(read_i + 1);
 
     return true;
 }
 template <class T> bool Buffer<T>::can_read() const {
     // Only returns true if:
     //   - end_readable != start_readable
-    std::size_t start = this->start_readable;
-    std::size_t end = this->end_readable;
+    std::size_t start = this->start_readable.load();
+    std::size_t end = this->end_readable.load();
     return start != end;
 }
 
 template <class T> std::string Buffer<T>::to_string() const {
     const static int bar_length = 50;
 
-    std::size_t start = this->start_readable;
-    std::size_t end = this->end_readable;
+    std::size_t start = this->start_readable.load();
+    std::size_t end = this->end_readable.load();
 
     // First, compute the pixel posses
     int start_pos = (int) ((((start % this->size) / (float) this->size) * bar_length) + 0.5);

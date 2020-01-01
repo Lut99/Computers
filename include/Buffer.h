@@ -7,6 +7,7 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
+#include <atomic>
 #include <cstddef>
 
 namespace DataTypes {
@@ -14,8 +15,10 @@ namespace DataTypes {
         private:
             T *buffer;
 
-            std::size_t start_readable;
-            std::size_t end_readable;
+            std::atomic<std::size_t> start_readable;
+            //std::size_t start_readable;
+            std::atomic<std::size_t> end_readable;
+            //std::size_t end_readable;
         public:
             const std::size_t size;
 
