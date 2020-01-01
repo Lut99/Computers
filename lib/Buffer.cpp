@@ -22,7 +22,8 @@ template <class T> Buffer<T>::Buffer(std::size_t size)
 
     // Set the i's to zero.
     this->start_readable = 0;
-    this->end_readable = 0;
+    this->start_writeable = 0;
+    this->is_empty = true;
 }
 template <class T> Buffer<T>::~Buffer() {
     delete[] this->buffer;
@@ -33,21 +34,22 @@ template <class T> bool Buffer<T>::write(T elem) {
         return false;
     }
 
-    // Increment end_readable
-    std::size_t to_write = this->end_readable.load() + 1;
+    // Fetch the writing position
+    std::size_t write_i = this->end_readable.load();
 
     // Write to that zone
-    this->buffer[to_write % this->size] = elem;
+    this->buffer[write_i % this->size] = elem;
+    std::cout << "Written to: " << (write_i % this->size) << std::endl;
 
     // Update the readable var
-    this->end_readable.store(to_write);
+    this->end_readable.store(write_i + 1);
 
     return true;
 }
 template <class T> bool Buffer<T>::can_write() const {
     // Only returns true if:
-    //   - (end_readable - start_readable) >= 0 && (end_readable - start_readable) <= size
-    //   - (end_readable - start_readable) < 0 && (end_readable + (size - start_readable)) <= size
+    //   - (start_writeable - start_readable) >= 0 && (end_readable - start_readable) <= size
+    //   - (start_writeable - start_readable) < 0 && (end_readable + (size - start_readable)) <= size
     std::size_t start = this->start_readable.load();
     std::size_t end = this->end_readable.load();
     return (end - start >= 0 && end - start < this->size) || (end - start < 0 && end + (this->size - start) < this->size);
@@ -61,6 +63,8 @@ template <class T> bool Buffer<T>::read(T& elem) {
     // Read from the start of the zone
     std::size_t read_i = this->start_readable.load();
     elem = this->buffer[read_i % this->size];
+    
+    //std::cout << "Read from: " << (read_i % this->size) << std::endl;
 
     // Update the readable var
     this->start_readable.store(read_i + 1);

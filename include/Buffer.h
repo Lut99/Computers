@@ -17,8 +17,9 @@ namespace DataTypes {
 
             std::atomic<std::size_t> start_readable;
             //std::size_t start_readable;
-            std::atomic<std::size_t> end_readable;
+            std::atomic<std::size_t> start_writeable;
             //std::size_t end_readable;
+            std::atomic<bool> is_empty;
         public:
             const std::size_t size;
 
