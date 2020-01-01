@@ -122,12 +122,7 @@ void *thread_1_2(void *arg) {
 
     Buffer<int> *buff = ((ThreadArgs*) arg)->buffer;
 
-    for (int i = 0; i < 10000; i++) {
-        // Do a sleep somewhere
-        if (i == 42) {
-            std::this_thread::sleep_for(std::chrono::seconds(5));
-        }
-
+    for (int i = 0; i < 64; i++) {
         // Wait until we can write
         while (!buff->write(i)) {}
     }
@@ -145,25 +140,21 @@ void *thread_2_2(void *arg) {
 
     Buffer<int> *buff = ((ThreadArgs*) arg)->buffer;
 
-    for (int i = 0; i < 10000; i++) {
-        // Do a longer sleep somewhere else
-        if (i == 4200) {
-            std::this_thread::sleep_for(std::chrono::seconds(5));
-        }
-        
+    int *results = new int[64];
+    for (int i = 0; i < 64; i++) {
         // Wait until we can read
         int result = -1;
         while (!buff->read(result)) {}
 
-        // Read to the cout
-        cout << "Read: " << result << endl;
+        // Store the values
+        results[i] = result;
     }
     cout << "  Thread 2 is finished." << endl;
     cout.flush();
 
     ((ThreadArgs*) arg)->done = true;
 
-    return NULL;
+    return (void*) results;
 }
 
 bool test_values() {
@@ -190,7 +181,17 @@ bool test_values() {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     pthread_join(args1.id, NULL);
-    pthread_join(args2.id, NULL);
+    void *v_results;
+    pthread_join(args2.id, &v_results);
+    int *results = (int *) v_results;
+
+    // Show the results
+    for (int i = 0; i < 64; i++) {
+        cout << "Result: " << results[i] << endl;
+    }
+
+    // dealloc
+    delete[] results;
 
     cout << "Success" << endl;
 
@@ -200,6 +201,6 @@ bool test_values() {
 
 int main() {
     cout << endl << "### TEST for \"Instruction.cpp\" ###" << endl << endl;
-    test_drawing();
+    //test_drawing();
     test_values();
 }
