@@ -21,9 +21,9 @@ template <class T> Buffer<T>::Buffer(std::size_t size)
     this->buffer = new T[this->size];
 
     // Set the i's to zero.
-    this->start_readable = 0;
-    this->start_writeable = 0;
-    this->is_empty = true;
+    this->start_readable.store(0);
+    this->start_writeable.store(0);
+    this->is_empty.store(true);
 }
 template <class T> Buffer<T>::~Buffer() {
     delete[] this->buffer;
@@ -34,15 +34,19 @@ template <class T> bool Buffer<T>::write(T elem) {
         return false;
     }
 
-    // Fetch the writing position
-    std::size_t write_i = this->end_readable.load();
+    // Write to the start of the writeable zone
+    std::size_t write_i = this->start_writeable.load();
+    this->buffer[write_i] = elem;
 
-    // Write to that zone
-    this->buffer[write_i % this->size] = elem;
-    std::cout << "Written to: " << (write_i % this->size) << std::endl;
+    // Update the writable var
+    write_i++;
+    if (write_i >= this->size) {
+        write_i = 0;
+    }
+    this->start_writeable.store(write_i);
 
-    // Update the readable var
-    this->end_readable.store(write_i + 1);
+    // The buffer isn't empty by default
+    this->is_empty.store(false);
 
     return true;
 }
@@ -51,8 +55,9 @@ template <class T> bool Buffer<T>::can_write() const {
     //   - (start_writeable - start_readable) >= 0 && (end_readable - start_readable) <= size
     //   - (start_writeable - start_readable) < 0 && (end_readable + (size - start_readable)) <= size
     std::size_t start = this->start_readable.load();
-    std::size_t end = this->end_readable.load();
-    return (end - start >= 0 && end - start < this->size) || (end - start < 0 && end + (this->size - start) < this->size);
+    std::size_t end = this->start_writeable.load();
+    bool empty = this->is_empty.load();
+    return empty || start != end;
 }
 
 template <class T> bool Buffer<T>::read(T& elem) {
@@ -62,32 +67,39 @@ template <class T> bool Buffer<T>::read(T& elem) {
 
     // Read from the start of the zone
     std::size_t read_i = this->start_readable.load();
-    elem = this->buffer[read_i % this->size];
-    
-    //std::cout << "Read from: " << (read_i % this->size) << std::endl;
+    elem = this->buffer[read_i];
 
     // Update the readable var
-    this->start_readable.store(read_i + 1);
+    read_i++;
+    if (read_i >= this->size) {
+        read_i = 0;
+    }
+    this->start_readable.store(read_i);
+
+    // If now start_readable == start_writeable, then update empty to being true
+    if (read_i == this->start_writeable.load()) {
+        this->is_empty.store(true);
+    }
 
     return true;
 }
 template <class T> bool Buffer<T>::can_read() const {
     // Only returns true if:
     //   - end_readable != start_readable
-    std::size_t start = this->start_readable.load();
-    std::size_t end = this->end_readable.load();
-    return start != end;
+    std::size_t empty = this->is_empty.load();
+    return !empty;
 }
 
 template <class T> std::string Buffer<T>::to_string() const {
     const static int bar_length = 50;
 
     std::size_t start = this->start_readable.load();
-    std::size_t end = this->end_readable.load();
+    std::size_t end = this->start_writeable.load();
+    std::size_t empty = this->is_empty.load();
 
     // First, compute the pixel posses
-    int start_pos = (int) ((((start % this->size) / (float) this->size) * bar_length) + 0.5);
-    int end_pos = (int) ((((end % this->size) / (float) this->size) * bar_length) + 0.5);
+    int start_pos = (int) (((start / (float) this->size) * bar_length) + 0.5);
+    int end_pos = (int) (((end / (float) this->size) * bar_length) + 0.5);
 
     // Next, print the three lines
     std::stringstream start_line;
@@ -110,6 +122,9 @@ template <class T> std::string Buffer<T>::to_string() const {
     }
     // Add other text + newlines
     start_line << " (start = " << start << ")" << std::endl;
+    if (empty) {
+        bar_line << " (empty)";
+    }
     bar_line << std::endl;
     end_line << " (end = " << end << ")" << std::endl;
     

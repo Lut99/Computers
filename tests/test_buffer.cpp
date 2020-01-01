@@ -122,7 +122,7 @@ void *thread_1_2(void *arg) {
 
     Buffer<int> *buff = ((ThreadArgs*) arg)->buffer;
 
-    for (int i = 0; i < 64; i++) {
+    for (int i = 63; i >= 0; i--) {
         // Wait until we can write
         while (!buff->write(i)) {}
     }
