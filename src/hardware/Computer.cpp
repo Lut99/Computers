@@ -149,25 +149,21 @@ void Computer::Computer::execute_software() {
     if (this->waiting_for == NULL) {
         // Execute the next instruction
         this->cpu->execute();
-    } else {
-        // Check if the waiting_for is done now
-        if (this->waiting_for->ready) {
-            // It is, store the pointer so it isn't overwritten by accident
-            Command *cmd = this->waiting_for;
+    } else if (this->waiting_for->ready) {
+        // We are, store the pointer so it isn't overwritten by accident
+        Command *cmd = this->waiting_for;
 
-            // Now resume execution
-            this->cpu->execute();
+        // Now resume execution
+        this->cpu->execute();
 
-            // Check if the command has been replaced by a new one
-            if (this->waiting_for == cmd) {
-                // It hasn't: clear the waiting_for
-                this->waiting_for = NULL;
-            }
-
-            // In any case, remove the old command
-            delete cmd;
+        // Check if the command has been replaced by a new one
+        if (this->waiting_for == cmd) {
+            // It hasn't: clear the waiting_for
+            this->waiting_for = NULL;
         }
-        // Otherwise, we have to wait for the hardware thread to handle it; return
+
+        // In any case, remove the old command
+        delete cmd;
     }
 }
 void Computer::Computer::execute_hardware() {
