@@ -20,8 +20,8 @@ namespace Compiler {
             /* The Chaos1_0_0 compiler is a derivative from the default AssemblyCompiler class. They idea is for every line in the preparsed input file, it takes that line and returns a binary string that can be written to the output file. */
             Chaos1_0_0_compiler();
 
-             /* The assemble step of the pipeline. Takes a line from the file, determines what the correct operator is and outputs a the result in the given binarystream. Note that this function should be allowed to throw errors by itself (non-catchable). */
-             void compile(DataTypes::BinaryStream& result, std::string line);
+            /* The assemble step of the pipeline. Takes a line from the file, determines what the correct operator is and outputs a the result in the given binarystream. Note that this function should be allowed to throw errors by itself (non-catchable). */
+            void compile(DataTypes::BinaryStream& result, std::string line);
     };
 
     /* Creates and returns a pointer to the derived AssemblyCompiler class. Be aware that this should be deleted. */

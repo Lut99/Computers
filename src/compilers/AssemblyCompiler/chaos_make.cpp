@@ -28,6 +28,14 @@ using namespace std;
 using namespace Compiler;
 using namespace DataTypes;
 
+string hexify(char *data, std::size_t size) {
+    stringstream sstr;
+    for (std::size_t i = 0; i < size; i++) {
+        sstr << data[i];
+    }
+    return sstr.str();
+}
+
 /* Keeps track of the dlopen file handle */
 void *compiler_handle;
 /* Used to signal the fetch step of the pipeline is done */
@@ -67,12 +75,14 @@ void* pipeline_in(void *args) {
         }
 
         cout << "Pipeline #1: Got line \"" << line << "\"" << endl;
+        cout.flush();
 
         // Mark this line as done
         done++;
     }
 
     cout << "Pipeline #1, signing off (did " << done << " items)" << endl;
+    cout.flush();
 
     // Propagate done
     fetch_done = done;
@@ -103,6 +113,7 @@ void* pipeline_compile(void *args) {
             // Stop entirely if there is nothing coming anymore
             if (fetch_done == done) {
                 cout << "Pipeline #2, going home (did " << done << " items)" << endl;
+                cout.flush();
                 // Propagate done
                 compile_done = done;
                 return NULL;
@@ -114,6 +125,7 @@ void* pipeline_compile(void *args) {
         bin->read(line);
 
         cout << "Pipeline #2: Got line \"" << line << "\" from #1" << endl;
+        cout.flush();
 
         // Compile it
         compiler->compile(result, line);
@@ -155,6 +167,7 @@ void *pipeline_out(void *args) {
             // Stop entirely if there is nothing coming anymore
             if (compile_done == done) {
                 cout << "Pipeline #3, sayin' goodbye (did " << done << " items)" << endl;
+                cout.flush();
                 return NULL;
             }
         }
@@ -162,7 +175,8 @@ void *pipeline_out(void *args) {
         // Actually read
         buff->read(res);
 
-        cout << "Pipeline #3: Got line \"" << res.data << "\" from #2" << endl;
+        cout << "Pipeline #3: Got line \"" << hexify(res.data, res.size) << "\" from #2" << endl;
+        cout.flush();
 
         // Send it to the output
         out->write(res.data, res.size);
