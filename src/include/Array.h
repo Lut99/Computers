@@ -12,6 +12,7 @@
 #include <iostream>
 #include <cstddef>
 #include <stdexcept>
+#include <limits.h>
 
 namespace DataTypes {
     template <class T> class Array {
@@ -82,6 +83,31 @@ namespace DataTypes {
                 for (std::size_t i = 0; i < this->size; i++) {
                     result[i] = this->data[i];
                 }
+            }
+
+            /* Returns a subset of the current array as new array (copies elements). */
+            Array<T>& subset(std::size_t pos, std::size_t length = ULONG_MAX) {
+                // Return an empty array if the length is out of bounds
+                if (length < 0 || length >= this->size) {
+                    return new Array<T>();
+                }
+                // First, compute the actual length
+                std::size_t act_length = this->size - pos;
+                // If the length is shorter, use that instead
+                if (length < act_length) {
+                    act_length = length;
+                }
+
+                // Create an array with that size
+                Array<T> *to_return = new Array<T>(act_length);
+
+                // Copy the appropriate elements over
+                for (std::size_t i = 0; i < act_length; i++) {
+                    to_return[i] = this->data[pos + i];
+                }
+
+                // Done, return
+                return to_return;
             }
 
             /* Returns a reference to a value in the array. Throws an out_of_range exception if the index is out of range. */

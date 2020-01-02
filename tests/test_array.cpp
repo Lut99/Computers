@@ -25,6 +25,11 @@ string print_array(int *arr, std::size_t size) {
     sstr << "]";
     return sstr.str();
 }
+string print_array(Array<int> arr) {
+    int result[arr.length()];
+    arr.c_arr(result);
+    return print_array(result, arr.length());
+}
 
 
 bool test_fixed_manual() {
@@ -133,6 +138,78 @@ bool test_flexible() {
     return correct;
 }
 
+bool test_subset() {
+    cout << "Testing array subset..." << endl;
+
+    cout << "  Generating random integer array..." << endl;
+    int expected[16];
+    for (int i = 0; i < 16; i++) {
+        expected[i] = rand();
+    }
+    cout << "  Generating a subset (range: 0-5)..." << endl;
+    int expected_subset_0_5[6];
+    for (int i = 0; i < 6; i++) {
+        expected_subset_0_5[i] = expected[i];
+    }
+    cout << "  Generating a subset (range: 6-15)..." << endl;
+    int expected_subset_6_15[10];
+    for (int i = 6; i < 16; i++) {
+        expected_subset_6_15[i - 6] = expected[i];
+    }
+    cout << "  Generating a subset (range: 3-12)..." << endl;
+    int expected_subset_3_12[10];
+    for (int i = 3; i < 13; i++) {
+        expected_subset_3_12[i - 3] = expected[i];
+    }
+
+    cout << "  Creating array (copied)..." << endl;
+    Array<int> arr = Array<int>(expected, 16);
+
+    cout << "  Subset (range: 0-5): ";
+    Array<int> arr_subset_0_5 = arr.subset(0, 6);
+    cout << print_array(arr_subset_0_5);
+
+    cout << "  Subset (range: 6-15): ";
+    Array<int> arr_subset_6_15 = arr.subset(6);
+    cout << print_array(arr_subset_6_15);
+
+    cout << "  Subset (range: 3-12): ";
+    Array<int> arr_subset_3_12 = arr.subset(3, 10);
+    cout << print_array(arr_subset_3_12);
+
+    // Check if it is expected
+    bool correct_0_5 = true;
+    bool correct_6_15 = true;
+    bool correct_3_12 = true;
+    for (int i = 0; i < 16; i++) {
+        if (arr_subset_0_5[i] != expected_subset_0_5[i]) {
+            correct_0_5 = false;
+            break;
+        }
+        if (arr_subset_6_15[i] != expected_subset_6_15[i]) {
+            correct_6_15 = false;
+            break;
+        }
+        if (arr_subset_3_12[i] != expected_subset_3_12[i]) {
+            correct_3_12 = false;
+            break;
+        }
+    }
+    if (!correct_0_5) {
+        cout << "Failure: expected " << print_array(expected_subset_0_5, 6) << ", got " << print_array(arr_subset_0_5) << endl << endl;
+        return false;
+    } else if (!correct_6_15) {
+        cout << "Failure: expected " << print_array(expected_subset_6_15, 6) << ", got " << print_array(arr_subset_6_15) << endl << endl;
+        return false;
+    } else if (!correct_3_12) {
+        cout << "Failure: expected " << print_array(expected_subset_3_12, 6) << ", got " << print_array(arr_subset_3_12) << endl << endl;
+        return false;
+    } else {
+        cout << "Succes" << endl << endl;
+        return true;
+    }
+}
+
 
 int main() {
     cout << endl << "### TEST for \"Array.h\" ###" << endl << endl;
@@ -143,6 +220,9 @@ int main() {
         return 1;
     }
     if (!test_flexible()) {
+        return 1;
+    }
+    if (!test_subset()) {
         return 1;
     }
 }
