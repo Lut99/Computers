@@ -9,6 +9,7 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
+#include <iostream>
 #include <cstddef>
 #include <stdexcept>
 
@@ -92,6 +93,18 @@ namespace DataTypes {
 
                 // Return the object pointed at
                 return this->data[index];
+            }
+
+            friend ostream& operator<<(ostream& os, Array<T> arr) {
+                os << "[";
+                for (std::size_t i = 0; i < this->size; i++) {
+                    if (i > 0) {
+                        os << ",";
+                    }
+                    os << this->data[i];
+                }
+                os << "]";
+                return os;
             }
     };
 }
