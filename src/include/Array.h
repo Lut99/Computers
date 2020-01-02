@@ -76,6 +76,13 @@ namespace DataTypes {
                 this->operator[](this->size - 1) = elem;
             }
 
+            /* Returns a copy of the inner array at the given pointer location. */
+            void c_arr(T* result) {
+                for (std::size_t i = 0; i < this->size; i++) {
+                    result[i] = this->data[i];
+                }
+            }
+
             /* Returns a reference to a value in the array. Throws an out_of_range exception if the index is out of range. */
             T& operator[](std::size_t index) {
                 // Check if the index is within bounds
