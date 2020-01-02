@@ -11,7 +11,7 @@
 #include <sstream>
 #include <map>
 
-#include "Limits.cpp"
+#include "../include/Limits.h"
 #include "../include/StringConverter.h"
 
 template <typename T> T StringConverter::toInteger(std::string to_parse, StringConverterMode mode) {

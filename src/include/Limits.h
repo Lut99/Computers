@@ -1,10 +1,13 @@
-/* LIMITS.cpp
+/* LIMITS.h
 *    by Lut99
 *
 *  A file that can dynamically return the maximum and minimum values for given
 *  integer types. Note that, for functionality, there is no .h file as this has
 *  to be included.
 **/
+
+#ifndef LIMITS_H
+#define LIMITS_H
 
 #include <string>
 #include <limits.h>
@@ -95,3 +98,5 @@ namespace std {
             const static bool can_minus = true;
     };
 }
+
+#endif
