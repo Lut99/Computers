@@ -9,7 +9,7 @@
 
 #include <string>
 #include <map>
-#include "../../include/Version.h"
+#include "../include/Version.h"
 #include "../Hardware/CPU.h"
 
 namespace Computer {

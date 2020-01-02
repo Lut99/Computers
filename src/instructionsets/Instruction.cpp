@@ -7,9 +7,9 @@
 
 #include <map>
 
-#include "../../include/Errors.h"
+#include "../include/Errors.h"
 #include "Instruction.h"
-#include "../../include/Encoding.h"
+#include "../include/Encoding.h"
 
 using namespace std;
 using namespace Computer;

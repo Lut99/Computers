@@ -10,8 +10,8 @@
 
 #include <iostream>
 
-#include "../../include/Encoding.h"
-#include "../../include/Errors.h"
+#include "../include/Encoding.h"
+#include "../include/Errors.h"
 #include "CPU.h"
 
 #define N_REGISTERS 16
