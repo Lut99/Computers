@@ -36,3 +36,6 @@ Buffer.o: lib/Buffer.cpp
 	$(CC) $(ARGS) -o bin/lib/linux64/Buffer.o -c lib/Buffer.cpp
 test_buffer: tests/test_buffer.cpp Buffer.o
 	$(CC) $(ARGS) -o tests/bin/test_buffer tests/test_buffer.cpp bin/lib/linux64/Buffer.o -lpthread
+
+test_array: tests/test_array.cpp src/include/Array.h
+	$(CC) $(ARGS) -o tests/bin/test_array tests/test_array.cpp src/include/Array.h

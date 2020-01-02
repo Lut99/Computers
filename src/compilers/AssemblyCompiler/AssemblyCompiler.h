@@ -9,7 +9,8 @@
 
 #include <string>
 
-#include "../../../include/BinaryStream.h"
+#include "../../include/BinaryStream.h"
+#include "../../include/Array.h"
 
 namespace Compiler {
     class AssemblyCompiler {
@@ -21,7 +22,7 @@ namespace Compiler {
             AssemblyCompiler(std::string compiler_name, std::string compiler_id);
 
             /* The assemble step of the pipeline. Takes a line from the file, determines what the correct operator is and outputs a the result in the given binarystream. Note that this function should be allowed to throw errors by itself (non-catchable). */
-            virtual void compile(DataTypes::BinaryStream& result, std::string line);
+            virtual void compile(DataTypes::BinaryStream& result, std::string command, DataTypes::Array<std::string> args);
     };
 }
 

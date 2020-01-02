@@ -7,6 +7,7 @@
 #ifndef CHAOS1_0_0_H
 #define CHAOS1_0_0_H
 
+#include "../../../include/Array.h"
 #include "../AssemblyCompiler.h"
 
 namespace Compiler {
@@ -21,7 +22,7 @@ namespace Compiler {
             Chaos1_0_0_compiler();
 
             /* The assemble step of the pipeline. Takes a line from the file, determines what the correct operator is and outputs a the result in the given binarystream. Note that this function should be allowed to throw errors by itself (non-catchable). */
-            void compile(DataTypes::BinaryStream& result, std::string line);
+            void compile(DataTypes::BinaryStream& result, std::string command, DataTypes::Array<std::string> args);
     };
 
     /* Creates and returns a pointer to the derived AssemblyCompiler class. Be aware that this should be deleted. */
