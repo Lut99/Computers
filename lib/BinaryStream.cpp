@@ -22,25 +22,29 @@ using namespace std;
 using namespace DataTypes;
 
 /* BINARY STRINGS */
-BinaryString::BinaryString() {
+BinaryString::BinaryString(bool deallocate) {
     // Set the data to NULL and the size to 0
     this->data = NULL;
     this->size = 0;
+    this->deallocate = deallocate;
 }
-BinaryString::BinaryString(char *data_string, std::size_t data_size) {
+BinaryString::BinaryString(char *data_string, std::size_t data_size, bool deallocate) {
     // Simply set these as values
     this->data = data_string;
     this->size = data_size;
+    this->deallocate = deallocate;
 }
-BinaryString::BinaryString(void *data_string, std::size_t data_size) {
+BinaryString::BinaryString(void *data_string, std::size_t data_size, bool deallocate) {
     // Reinterpret cast the void*
     this->data = static_cast<char*>(data_string);
     this->size = data_size;
+    this->deallocate = deallocate;
 }
-BinaryString::BinaryString(char *null_terminated_string) {
+BinaryString::BinaryString(char *null_terminated_string, bool deallocate) {
     // Set the values
     this->data = null_terminated_string;
     this->size = 0;
+    this->deallocate = deallocate;
     // Now loop and find the size
     for (; this->size < INT_MAX; this->size++) {
         // Stop if the '\0'is found
@@ -50,6 +54,12 @@ BinaryString::BinaryString(char *null_terminated_string) {
     }
     // Add an additional count for '\0' itself
     this->size++;
+}
+BinaryString::~BinaryString() {
+    // If given, deallocate the inner object
+    if (this->deallocate) {
+        delete[] this->data;
+    }
 }
 
 /* BINARY STREAM */

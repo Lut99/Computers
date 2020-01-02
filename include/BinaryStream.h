@@ -12,20 +12,24 @@
 
 namespace DataTypes {
     struct BinaryString {
-        char *data;
-        std::size_t size;
+        private:
+            char deallocate;
+        public:
+            char *data;
+            std::size_t size;
 
-        /* Create an empty BinaryString object. */
-        BinaryString();
+            /* Create an empty BinaryString object. */
+            BinaryString(bool deallocate = true);
+            ~BinaryString();
 
-        /* Create a BinaryString object by ptr and size. Note: does nothing about allocation or deallocation. */
-        BinaryString(char *data_string, std::size_t data_size);
+            /* Create a BinaryString object by ptr and siz. If desired, the deallocation of the internat char array can be disabled. */
+            BinaryString(char *data_string, std::size_t data_size, bool deallocate = true);
 
-        /* Create a BinaryString object by void ptr and size. Note: does nothing about allocation or deallocation. */
-        BinaryString(void *data_string, std::size_t data_size);
+            /* Create a BinaryString object by void ptr and size. If desired, the deallocation of the internat char array can be disabled. */
+            BinaryString(void *data_string, std::size_t data_size, bool deallocate = true);
 
-        /* Create a BinaryString object by providing a null-terminated char*. Note: does nothing about allocation or deallocation. */
-        BinaryString(char *null_terminated_string);
+            /* Create a BinaryString object by providing a null-terminated char*. If desired, the deallocation of the internat char array can be disabled. */
+            BinaryString(char *null_terminated_string, bool deallocate = true);
     };
 
     class BinaryStream {
