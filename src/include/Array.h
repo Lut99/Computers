@@ -19,11 +19,33 @@ namespace DataTypes {
             std::size_t size;
         
         public:
-            /* The array class provides a python-like array that can resize (though with terrible complexity) and holds information about it's own size. */
+            /* The array class provides a python-like array that can resize (though with terrible complexity) and holds information about it's own size. By default, it initializes with a size of 0 and has to be appended. */
             Array(std::size_t size = 0) {
                 // Initialize the inner array
                 this->data = new T[size];
                 this->size = size;
+            }
+            /* The array class provides a python-like array that can resize (though with terrible complexity) and holds information about it's own size. This overload initializes it with data and size from given, normal array. */
+            Array(T* data, std::size_t n) {
+                // Initialize the inner array
+                this->data = new T[n];
+                this->size = n;
+
+                // Copy all elements
+                for (std::size_t i = 0; i < n; i++) {
+                    this->data[i] = data[i];
+                }
+            }
+            /* The array class provides a python-like array that can resize (though with terrible complexity) and holds information about it's own size. This overload initializes it with data and size from given Array object. */
+            Array(Array<T> arr) {
+                // Initialize the inner array
+                this->size = arr.length();
+                this->data = new T[this->size];
+                
+                // Copy the elements
+                for (std::size_t i = 0; i < this->size; i++) {
+                    this->data[i] = arr[i];
+                }
             }
             ~Array() {
                 delete[] this->data;
