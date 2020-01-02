@@ -38,7 +38,7 @@ namespace DataTypes {
                 }
             }
             /* The array class provides a python-like array that can resize (though with terrible complexity) and holds information about it's own size. This overload initializes it with data and size from given Array object. */
-            Array(Array<T> arr) {
+            Array(Array<T>& arr) {
                 // Initialize the inner array
                 this->size = arr.length();
                 this->data = new T[this->size];
@@ -93,18 +93,6 @@ namespace DataTypes {
 
                 // Return the object pointed at
                 return this->data[index];
-            }
-
-            friend ostream& operator<<(ostream& os, Array<T> arr) {
-                os << "[";
-                for (std::size_t i = 0; i < this->size; i++) {
-                    if (i > 0) {
-                        os << ",";
-                    }
-                    os << this->data[i];
-                }
-                os << "]";
-                return os;
             }
     };
 }
