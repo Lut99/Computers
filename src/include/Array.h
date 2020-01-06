@@ -78,6 +78,20 @@ namespace DataTypes {
                 this->operator[](this->size - 1) = elem;
             }
 
+            /* Resets the array to a size of 0 */
+            Array<T>& clear() {
+                // Create new data
+                T* new_data = new T[0];
+                std::size_t new_size = 0;
+
+                // Deallocate old
+                delete[] this->data;
+
+                // Overwrite
+                this->data = new_data;
+                this->size = new_size;
+            }
+
             /* Returns a copy of the inner array at the given pointer location. */
             void c_arr(T* result) {
                 for (std::size_t i = 0; i < this->size; i++) {
@@ -86,10 +100,12 @@ namespace DataTypes {
             }
 
             /* Returns a subset of the current array as new array (copies elements). */
-            Array<T>& subset(std::size_t pos, std::size_t length = ULONG_MAX) {
-                // Return an empty array if the length is out of bounds
-                if (length < 0 || length >= this->size) {
-                    return new Array<T>();
+            Array<T>& subset(Array<T>& result, std::size_t pos, std::size_t length = ULONG_MAX) {
+                // Clear the array
+                result.clear();
+                // Do nothing if the subset is out-of-bounds
+                if (pos < 0 || pos >= this->size) {
+                    return result;
                 }
                 // First, compute the actual length
                 std::size_t act_length = this->size - pos;
@@ -98,8 +114,8 @@ namespace DataTypes {
                     act_length = length;
                 }
 
-                // Create an array with that size
-                Array<T> *to_return = new Array<T>(act_length);
+                // Resize the array to have that many elements
+                result.resize(act_length);
 
                 // Copy the appropriate elements over
                 for (std::size_t i = 0; i < act_length; i++) {
@@ -107,8 +123,11 @@ namespace DataTypes {
                 }
 
                 // Done, return
-                return to_return;
+                return result;
             }
+
+            /* Resizes the array to a new size. Note that, if the new size is smaller than the old, any overflow elements will be discarded (without clearing them in any) */
+            
 
             /* Returns a reference to a value in the array. Throws an out_of_range exception if the index is out of range. */
             T& operator[](std::size_t index) {
