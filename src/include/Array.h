@@ -59,7 +59,7 @@ namespace DataTypes {
             }
 
             /* Adds an element at the end of the array. Note that this resizes the array, and that this is done with a very high complexity. */
-            void append(T elem) {
+            Array<T>& append(T elem) {
                 // First, resize the array to +1
                 std::size_t new_size = this->size + 1;
                 T *new_data = new T[new_size];
@@ -76,6 +76,9 @@ namespace DataTypes {
 
                 // Now put the element in the last position
                 this->operator[](this->size - 1) = elem;
+
+                // Return the array for chainability
+                return *this;
             }
 
             /* Resets the array to a size of 0 */
@@ -99,7 +102,7 @@ namespace DataTypes {
                 }
             }
 
-            /* Returns a subset of the current array as new array (copies elements). */
+            /* Returns a subset of the current array as new array (copies elements). The result array is always cleared, even if anything is out of bounds, and is also returned so that easy chainability can be obtained. */
             Array<T>& subset(Array<T>& result, std::size_t pos, std::size_t length = ULONG_MAX) {
                 // Clear the array
                 result.clear();
@@ -119,15 +122,33 @@ namespace DataTypes {
 
                 // Copy the appropriate elements over
                 for (std::size_t i = 0; i < act_length; i++) {
-                    to_return[i] = this->data[pos + i];
+                    result[i] = this->data[pos + i];
                 }
 
                 // Done, return
                 return result;
             }
 
-            /* Resizes the array to a new size. Note that, if the new size is smaller than the old, any overflow elements will be discarded (without clearing them in any) */
-            
+            /* Resizes the array to a new size. Note that, if the new size is smaller than the old, any overflow elements will be discarded (without clearing them in any way). This array is returned for chainability. */
+            Array<T>& resize(std::size_t new_size) {
+                // Allocate new space
+                T* new_data = new T[new_size];
+
+                // Loop and copy until either bound has been reached
+                for (std::size_t i = 0; i < this->size && i < new_size; i++) {
+                    new_data[i] = this->data[i];
+                }
+
+                // Deallocate the old one
+                delete[] this->data;
+
+                // Overwrite existing pointers and stuff
+                this->data = new_data;
+                this->size = new_size;
+
+                // Done
+                return *this;
+            }
 
             /* Returns a reference to a value in the array. Throws an out_of_range exception if the index is out of range. */
             T& operator[](std::size_t index) {

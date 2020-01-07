@@ -165,32 +165,35 @@ bool test_subset() {
     cout << "  Creating array (copied)..." << endl;
     Array<int> arr = Array<int>(expected, 16);
 
-    cout << "  Subset (range: 0-5): ";
-    Array<int> arr_subset_0_5 = arr.subset(0, 6);
-    cout << print_array(arr_subset_0_5);
+    cout << "  Fetching subset from array (range: 0-5): ";
+    Array<int> arr_subset_0_5;
+    arr.subset(arr_subset_0_5, 0, 6);
+    cout << print_array(arr_subset_0_5) << endl;
 
-    cout << "  Subset (range: 6-15): ";
-    Array<int> arr_subset_6_15 = arr.subset(6);
-    cout << print_array(arr_subset_6_15);
+    cout << "  Fetching subset from array (range: 6-15): ";
+    Array<int> arr_subset_6_15;
+    arr.subset(arr_subset_6_15, 6);
+    cout << print_array(arr_subset_6_15) << endl;
 
-    cout << "  Subset (range: 3-12): ";
-    Array<int> arr_subset_3_12 = arr.subset(3, 10);
-    cout << print_array(arr_subset_3_12);
+    cout << "  Fetching subset from array (range: 3-12): ";
+    Array<int> arr_subset_3_12;
+    arr.subset(arr_subset_3_12, 3, 10);
+    cout << print_array(arr_subset_3_12) << endl;
 
     // Check if it is expected
     bool correct_0_5 = true;
     bool correct_6_15 = true;
     bool correct_3_12 = true;
     for (int i = 0; i < 16; i++) {
-        if (arr_subset_0_5[i] != expected_subset_0_5[i]) {
+        if (i < 6 && arr_subset_0_5[i] != expected_subset_0_5[i]) {
             correct_0_5 = false;
             break;
         }
-        if (arr_subset_6_15[i] != expected_subset_6_15[i]) {
+        if (i < 6 && arr_subset_6_15[i] != expected_subset_6_15[i]) {
             correct_6_15 = false;
             break;
         }
-        if (arr_subset_3_12[i] != expected_subset_3_12[i]) {
+        if (i < 10 && arr_subset_3_12[i] != expected_subset_3_12[i]) {
             correct_3_12 = false;
             break;
         }
