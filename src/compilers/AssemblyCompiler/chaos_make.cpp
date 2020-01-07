@@ -70,7 +70,8 @@ struct Settings {
 
 /* Struct that keeps track of line information */
 struct Pipeline_Line {
-    std::string text;
+    std::string command;
+    Array<string> args;
     std::size_t number;
 };
 /* Argument struct for pipeline 1. */
@@ -102,6 +103,7 @@ void* pipeline_in(void *args) {
             }
 
             // Convert the line number to std::size_t
+            std::size_t number;
             try {
                 number = StringConverter::toInteger<std::size_t>(words[0]);
             } catch (StringConverter::StringConvertionException& e) {
@@ -111,15 +113,21 @@ void* pipeline_in(void *args) {
                 return NULL;
             }
 
+            // Split into command and arguments
+            string command = words[0];
+            Array<string> args;
+            words.subset(args, 1);
+
             // Fill a pipeline struct
             Pipeline_Line p_line;
-            p_line.text = line;
+            p_line.command = words[0];
+            p_line.args = words;
             p_line.number = number;
 
             // Write to buffer
             buff->write(p_line);
             
-            cout << "Pipeline #1: Got line " << p_line.number << " \"" << p_line.text << "\"" << endl;
+            cout << "Pipeline #1: Got line " << p_line.number << " \"" << line << "\"" << endl;
             cout.flush();
 
             // Mark this line as done
@@ -180,16 +188,12 @@ void* pipeline_compile(void *args) {
         Pipeline_Line line;
         bin->read(line);
 
-        cout << "Pipeline #2: Got line " << line.number << " \"" << line.text << "\" from #1" << endl;
+        cout << "Pipeline #2: Got line " << line.number << " \"" << line.command << "\" from #1" << endl;
         cout.flush();
-
-        // Split it into multiple words
-        LinkedList<string> l_words = split(line.text);
-        array<string, l_words.length()>
 
         // Compile it
         try {
-            compiler->compile(result, words[0], words + 1);
+            compiler->compile(result, line.command, line.args);
         } catch (ParseException& e) {
             // Show the error
             cerr << "Parse Error: " << e.msg << endl;
