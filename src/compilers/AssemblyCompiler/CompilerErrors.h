@@ -13,15 +13,13 @@
 namespace Compiler {
     class ParseException : public std::exception {
         public:
+            const std::string name;
             const std::string msg;
-            const std::size_t line;
-            const std::string filepath;
 
             /* Base exception class for all parse errors */
-            ParseException(const std::size_t errored_line, const std::string path, const std::string message)
-                : line(errored_line),
-                filepath(path),
-                msg(path + " Line " + std::to_string(line) + ": " + message)
+            ParseException(const std::string error_name, const std::string message)
+                : name(error_name),
+                msg(message)
             {}
     };
 
@@ -30,8 +28,8 @@ namespace Compiler {
             const std::string instruction;
 
             /* Exception for when the compiler encounters an instruction it does not know */
-            UnknownInstructionException(const std::size_t errored_line, const std::string path, const std::string instr)
-                : ParseException(errored_line, path, "Unknown instruction \"" + instr + "\""),
+            UnknownInstructionException(const std::string instr)
+                : ParseException("UnknownInstructionException", "Unknown instruction \"" + instr + "\""),
                 instruction(instr)
             {}
     };
