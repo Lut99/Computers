@@ -34,6 +34,7 @@ using namespace std;
 using namespace Compiler;
 using namespace DataTypes;
 
+/* Returns a string with the hexadecimal representation of given byte array. */
 string hexify(char *data, std::size_t size) {
     stringstream sstr;
     sstr << "0x";
@@ -46,8 +47,32 @@ string hexify(char *data, std::size_t size) {
     return sstr.str();
 }
 
-Array<string> split(string text) {
+/* Splits given string into an array of string. The splitpoint is a character, which is ' ' by default. Optionally, all characters can also be converted to their lowercase counterpart if desired. */
+void split(Array<string>& result, string text, char split_point=' ', bool lowercase=false) {
+    LinkedList<string> parts;
+    stringstream part;
 
+    for (size_t i = 0; i < text.length(); i++) {
+        char c = text[i];
+
+        if (c == split_point) {
+            parts.append(part.str());
+            part.str("");
+            part.clear();
+        } else {
+            if (lowercase) {
+                part << tolower(c);
+            } else {
+                part << c;
+            }
+        }
+    }
+
+    // Add the last part
+    parts.append(part.str());
+
+    // Return a newly allocated array
+    parts.to_array(result);
 }
 
 /* Keeps track of the dlopen file handle */
@@ -95,7 +120,8 @@ void* pipeline_in(void *args) {
     while (getline(*pre, line)) {
         if (!line.empty() && line.length() > 0) {
             // Split the line into words
-            Array<string> words = split(line);
+            Array<string> words;
+            split(words, line, true);
             if (words.length() < 2) {
                 cerr << "Loading error occured: no line number or instruction in \"" << line << "\"" << endl;
                 error_occured = true;
@@ -196,7 +222,7 @@ void* pipeline_compile(void *args) {
             compiler->compile(result, line.command, line.args);
         } catch (ParseException& e) {
             // Show the error
-            cerr << "Parse Error: " << e.msg << endl;
+            cerr << "Line " << line.number << ": " << e.name << ": " << e.msg << endl;
             // Stop before anything new is allocated
             error_occured = true;
             return NULL;
