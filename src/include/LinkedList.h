@@ -10,6 +10,8 @@
 #include <string>
 #include <cstddef>
 
+#include "Array.h"
+
 namespace DataTypes {
     template <class T> struct Node {
         T value;
@@ -220,8 +222,19 @@ namespace DataTypes {
                 return sstr.str();
             }
 
-            /* Returns a pointer to a newly allocated array version of the LinkedList. Note that this will have to be deallocated later on. */
-            T* to_array() {
+            /* Returns all values stored in this LinkedList as DataTypes Array object. Note that it must have the same type as this LinkedList to work. */
+            void to_array(Array<T>& to_return) {
+                std::size_t i = 0;
+                for (Node<T> *n = this->first; n != NULL; n = n->next) {
+                    to_return[i] = n->value;
+                    i++;
+                }
+
+                return to_return;
+            }
+
+            /* Returns a pointer to a newly allocated c-style array version of the LinkedList. Note that this will have to be deallocated later on. */
+            T* c_arr() {
                 T* to_return = new T[this->size];
                 std::size_t i = 0;
                 for (Node<T> *n = this->first; n != NULL; n = n->next) {
