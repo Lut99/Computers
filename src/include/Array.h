@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <stdexcept>
 #include <limits.h>
+#include <initializer_list>
 
 namespace DataTypes {
     template <class T> class Array {
@@ -38,6 +39,18 @@ namespace DataTypes {
                     this->data[i] = data[i];
                 }
             }
+            /* The array class provides a python-like array that can resize (though with terrible complexity) and holds information about its own size. This overload initializes using a static initializer list. */
+            Array(std::initializer_list<T> il) {
+                this->size = il.size();
+                this->data = new T[this->size];
+
+                // Copy the data
+                std::size_t i = 0;
+                for (const T* elem = std::begin(il); elem != std::end(il); ++elem) {
+                    this->data[i] = *elem;
+                    i++;
+                }
+            }
             /* The array class provides a python-like array that can resize (though with terrible complexity) and holds information about it's own size. This overload initializes it with data and size from given Array object. */
             Array(Array<T>& arr) {
                 // Initialize the inner array
@@ -61,18 +74,7 @@ namespace DataTypes {
             /* Adds an element at the end of the array. Note that this resizes the array, and that this is done with a very high complexity. */
             Array<T>& append(T elem) {
                 // First, resize the array to +1
-                std::size_t new_size = this->size + 1;
-                T *new_data = new T[new_size];
-
-                // Copy the elements
-                for (std::size_t i = 0; i < this->size; i++) {
-                    new_data[i] = this->data[i];
-                }
-                // Deallocate the old array
-                delete[] this->data;
-                // Overwrite values
-                this->size = new_size;
-                this->data = new_data;
+                this->resize(this->size + 1);
 
                 // Now put the element in the last position
                 this->operator[](this->size - 1) = elem;

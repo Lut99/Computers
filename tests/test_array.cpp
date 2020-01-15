@@ -101,6 +101,35 @@ bool test_fixed_copy() {
     return correct;
 }
 
+bool test_fixed_static() {
+    cout << "Testing array with static initializer..." << endl;
+
+    cout << "  Creating reference array..." << endl;
+    int expected[16] = {0, 15, 1, 14, 2, 13, 3, 12, 4, 11, 5, 10, 6, 9, 7, 8};
+
+    cout << "  Creating array..." << endl;
+    Array<int> arr = {0, 15, 1, 14, 2, 13, 3, 12, 4, 11, 5, 10, 6, 9, 7, 8};
+
+    int result[16];
+    arr.c_arr(result);
+    cout << "  Result: " << print_array(result, 16) << endl;
+
+    // Check if it is expected
+    bool correct = true;
+    for (int i = 0; i < 16; i++) {
+        if (result[i] != expected[i]) {
+            correct = false;
+            break;
+        }
+    }
+    if (correct) {
+        cout << "Succes" << endl << endl;
+    } else {
+        cout << "Failure: expected " << print_array(expected, 16) << ", got " << print_array(result, 16) << endl << endl;
+    }
+    return correct;
+}
+
 bool test_flexible() {
     cout << "Testing array with flexible size..." << endl;
 
@@ -220,6 +249,9 @@ int main() {
         return 1;
     }
     if (!test_fixed_copy()) {
+        return 1;
+    }
+    if (!test_fixed_static()) {
         return 1;
     }
     if (!test_flexible()) {
