@@ -4,7 +4,7 @@
  * Created:
  *   1/15/2020, 5:15:20 PM
  * Last edited:
- *   1/15/2020, 5:32:39 PM
+ *   1/16/2020, 12:00:41 PM
  * Auto updated?
  *   Yes
  *
@@ -51,6 +51,17 @@ namespace Compiler {
             InvalidMemoryShortcutException(const std::string instr)
                 : ParseException("InvalidMemoryShortcutException", "The \"" + instr + "\"-instruction forbids memory shortcuts ('<regX') as destination register"),
                 instruction(instr)
+            {}
+    };
+
+    class InvalidArgumentsException: public ParseException {
+        public:
+            const std::string usage;
+
+            /* Exception for when a given instruction doesn't have the proper number of arguments or the arguments are of the wrong type */
+            InvalidArgumentsException(const std::string usage_message)
+                : ParseException("InvalidArgumentsException", "Invalid arguments (usage: " + usage_message + ")"),
+                usage(usage_message)
             {}
     };
 }

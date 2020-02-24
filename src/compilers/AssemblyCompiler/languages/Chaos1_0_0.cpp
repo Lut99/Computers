@@ -60,7 +60,12 @@ void parse_reg(Register& result, string raw) {
 
 
 /* INSTRUCTION COMPILERS */
-void Compile_ADD(BinaryStream& result, Array<string> args) {
+void Chaos1_0_0_compiler::Compile_ADD(BinaryStream& result, Array<string> args) {
+    // Make sure we have enough arguments
+    if (args.length() != 2) {
+        throw InvalidArgumentsException("ADD <destination register> <value register>");
+    }
+
     // Parse the first and second registers
     Register des_reg, val_reg;
     parse_reg(des_reg, args[0]);
@@ -71,14 +76,22 @@ void Compile_ADD(BinaryStream& result, Array<string> args) {
         throw InvalidMemoryShortcutException("ADD");
     }
 
-    // If the second one is a memory one, first add a MEM_READ
+    // If the second one is a memory one, first add a MEM_READ and then set the value of -1
     if (val_reg.is_mem) {
-        Compile_MEM_READ(result, Array<string>() {});
+        this->Compile_MEM_READ(result, Array<string>({"$reg" + to_string(val_reg.pointer)}));
+        val_reg.pointer = -1;
     }
+
+    // Now that that's done, add the binary numbers
+    result << 0x00;
+    result << des_reg.pointer;
+    result << val_reg.pointer;
 }
 
-void Compile_MEM_READ(BinaryStream& result, Array<string> args) {
-
+void Chaos1_0_0_compiler::Compile_MEM_READ(BinaryStream& result, Array<string> args) {
+    // Parse the register
+    Register reg;
+    parse_reg(reg, args[0]);
 }
 
 
@@ -89,7 +102,7 @@ Chaos1_0_0_compiler::Chaos1_0_0_compiler()
 void Chaos1_0_0_compiler::compile(DataTypes::BinaryStream& result, std::string command, Array<std::string> args) {
     // Determine the proper compile function for that command
     if (command == "add") {
-        Compile_ADD(result, args);
+        this->Compile_ADD(result, args);
     } else {
         throw UnknownInstructionException(command);
     }

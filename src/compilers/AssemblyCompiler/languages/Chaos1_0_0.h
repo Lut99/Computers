@@ -15,6 +15,11 @@ namespace Compiler {
         private:
             /* Compile functions for specific operators. */
 
+            /* Compiles the ADD-instruction. */
+            void Compile_ADD(DataTypes::BinaryStream& result, DataTypes::Array<string> args);
+
+            /* Compiles the MEM_READ-instruction. */
+            void Compile_MEM_READ(DataTypes::BinaryStream& result, DataTypes::Array<string> args);
 
 
         public:
