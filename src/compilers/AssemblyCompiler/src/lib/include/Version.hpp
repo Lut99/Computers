@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 11:44:11 AM
  * Last edited:
- *   3/1/2020, 12:23:13 PM
+ *   3/1/2020, 2:21:18 PM
  * Auto updated?
  *   Yes
  *
@@ -20,6 +20,7 @@
 #define VERSION_HPP
 
 #include <iostream>
+#include <string>
 
 namespace Tools {
     class Version {
@@ -35,6 +36,8 @@ namespace Tools {
             Version();
             /* Stores a version number as three parts. Can be compared to other versions using <, <=, ==, >= or >. */
             Version(char major_num, char minor_num, char tiny_num);
+
+            friend std::string to_string(const Version& v);
 
             friend bool operator==(const Version& l, const Version& r);
             friend bool operator!=(const Version& l, const Version& r);
@@ -66,6 +69,9 @@ namespace Tools {
     std::ostream& operator<<(std::ostream& os, const Version& v);
     /* Stream read operator for the Version class. Reads a string representation of the Version numbers from the stream. */
     std::istream& operator>>(std::istream& os, Version& v);
+
+    /* Returns a string representation of this Version object */
+    std::string to_string(const Version& v);
 }
 
 #endif

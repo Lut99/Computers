@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 11:45:27 AM
  * Last edited:
- *   3/1/2020, 12:23:25 PM
+ *   3/1/2020, 2:22:05 PM
  * Auto updated?
  *   Yes
  *
@@ -60,7 +60,7 @@ inline bool Tools::operator>=(const Version& lhs, const Version& rhs) {
 }
 
 ostream& Tools::operator<<(ostream& os, const Version& v) {
-    os << v.major_num << "." << v.minor_num << "." << v.tiny_num;
+    os << to_string(v);
     return os;
 }
 istream& Tools::operator>>(istream& is, Version& v) {
@@ -107,4 +107,8 @@ istream& Tools::operator>>(istream& is, Version& v) {
     v.tiny_num = ti;
 
     return is;
+}
+
+std::string to_string(const Version& v) {
+    return (std::to_string(v.major_num) + "." + std::to_string(v.minor_num) + "." + std::to_string(v.tiny_num));
 }

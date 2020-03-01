@@ -28,12 +28,13 @@
 "MEM_WRITE"                         { FILTER(MEM_WRITE); }
 "OUT"                               { FILTER(OUT); }
 "END"                               { FILTER(END); }
-\.[a-zA-Z0-9]+                      { token_val = 
-FILTER(TOKEN); }
 
-$[0-9]+                             { FILTER(REG_VAL); }
-0x[0-9]+                            { FILTER(HEX_VAL); }
-[0-9]+                              { FILTER(DEC_VAL); }
+$[0-9]+                             { yyval = atoi(yytext+1);
+                                      FILTER(REG_VAL); }
+0x[0-9]+                            { yyval = atoi(yytext+2);
+                                      FILTER(HEX_VAL); }
+[0-9]+                              { yyval = atoi(yytext);
+                                      FILTER(DEC_VAL); }
 
 "//".*$                             { col = 0;
                                       row++;

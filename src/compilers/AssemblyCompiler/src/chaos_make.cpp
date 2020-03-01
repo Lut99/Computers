@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 11:37:07 AM
  * Last edited:
- *   3/1/2020, 12:53:45 PM
+ *   3/1/2020, 3:02:33 PM
  * Auto updated?
  *   Yes
  *
@@ -17,10 +17,19 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
+#include <dlfcn.h>
+#include <cstring>
+#include <cerrno>
+
+extern "C" {
+#include "lib/include/InstrBase.h"
+}
+#include "parser/output/AssemblyParser.tab.h"
+#include "lib/include/Globals.h"
 
 #include "lib/include/Version.hpp"
-#include "parser/output/AssemblyParser.tab.h"
 #include "lib/include/cxxopts.hpp"
 
 using namespace cxxopts;
@@ -30,9 +39,69 @@ using namespace Tools;
 
 extern "C" FILE* yyin;
 
+/* Loads the two instruction-set dependend functions from given lang_dir, edition and version */
+void* load_instruction_set(string lang_dir, string edition, Version& version) {
+    // First, construct the filename
+    stringstream sstr;
+    sstr << lang_dir;
+    sstr << edition;
+    sstr << "_";
+    string v = to_string(version);
+    for (int i = 0; i < v.size(); i++) {
+        if (v[i] == '.') {
+            v[i] = '_';
+        }
+    }
+    sstr << v;
+    sstr << ".so";
+    string filename = sstr.str();
+    
+    // Try to open the library
+    void* handle = dlopen(filename.c_str(), RTLD_NOW);
+    if (handle == NULL) {
+        cerr << endl << "ERROR: Could not open library \"" << filename << "\"" << endl << endl;
+        exit(-1);
+    }
+
+    // Next, try to load the functions
+    make_instr = (make_instr_t) dlsym(handle, "make_instr");
+    if (make_instr == NULL) {
+        dlclose(handle);
+        cerr << endl << "ERROR: Could not load function \"make_instr\" from library \"" << filename << "\":" << dlerror() << endl << endl;
+        exit(-1);
+    }
+    compile_instr = (compile_instr_t) dlsym(handle, "compile_instr");
+    if (compile_instr == NULL) {
+        dlclose(handle);
+        cerr << endl << "ERROR: Could not load function \"make_instr\" from library \"" << filename << "\":" << dlerror() << endl << endl;
+        exit(-1);
+    }
+
+    return handle;
+}
+
+/* Writes given list of instructions to target binary file. */
+void write_binary(string output_file, struct instr_list* list) {
+    ofstream out(output_file, ostream::binary);
+    if (!out.is_open()) {
+        cerr << endl << "ERROR: Could not open file \"" + output_file + "\": " << strerror(errno) << endl << endl;
+        exit(-1);
+    }
+
+    // Loop and write
+    for (unsigned long i = 0; i < list->len; i++) {
+        char* exec = compile_instr(list->items[i]);
+        out << exec;
+        free(exec);
+    }
+
+    // Close the file
+    out.close();
+}
+
 int main(int argc, char** argv) {
     // Init the option variables
-    string edition, input, output;
+    string edition, input, output, lang_dir;
     bool verbose;
     Version version(0, 0, 0);
 
@@ -43,6 +112,7 @@ int main(int argc, char** argv) {
         ("V,version", "The string identifier of the Chaos version of the selected edition that needs to be compiled. Default is the most recent.", value<Version>())
         ("i,input", "The name of the input file.", value<string>())
         ("o,output", "The name of the output file.", value<string>())
+        ("l,lang_dir", "Directory where all binaries for each language is located.", value<string>())
         ("v,verbose", "If given, prints debug texts.")
         ;
     arguments.parse_positional("input");
@@ -82,16 +152,35 @@ int main(int argc, char** argv) {
         cerr << "Could not parse output: " << opt.what() << endl;
         exit(-1);
     }
+    try {
+        lang_dir = result["lang_dir"].as<string>();
+    } catch (domain_error& opt) {
+        lang_dir = "bin/linux/lang/";
+    } catch (OptionParseException& opt) {
+        cerr << "Could not parse lang_dir: " << opt.what() << endl;
+        exit(-1);
+    }
+    // Make sure lang_dir ends on a '/'
+    if (lang_dir[lang_dir.size() - 1] != '/') {
+        lang_dir += '/';
+    }
 
     // Check verbosity
     verbose = result.count("verbose") > 0;
 
-    // Open the input file
-    yyin = fopen(input.c_str(), "r");
-    // Run the parser
-    yyparse();
-    // Close the input again
-    fclose(yyin);
+    // First, load the instruction library
+    void* dl_handle = load_instruction_set(lang_dir, edition, version);
+
+    
+
+    // Write the list to a file
+    write_binary(output, program);
+
+    // Free the instructions list
+    FREE_INSTR_LIST(program);
+
+    // Close the handle
+    dlclose(dl_handle);
 
     return 0;
 }

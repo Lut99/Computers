@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.cvc": "c",
         "map": "cpp",
         "memory": "cpp",
         "streambuf": "cpp",
@@ -53,6 +54,12 @@
         "cstring": "cpp",
         "ctime": "cpp",
         "ratio": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "regex": "cpp",
+        "bitset": "cpp",
+        "unordered_set": "cpp",
+        "cinttypes": "cpp",
+        "stdlib.h": "c",
+        "instrbase.h": "c"
     }
 }
