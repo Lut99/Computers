@@ -1,5 +1,6 @@
+#line 2 "src/parser/output/AssemblyScanner.flex.c"
 
-#line 3 "lex.yy.c"
+#line 4 "src/parser/output/AssemblyScanner.flex.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -478,16 +479,26 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "AssemblyScanner.l"
-#line 2 "AssemblyScanner.l"
+#line 1 "src/parser/AssemblyScanner.l"
+#line 2 "src/parser/AssemblyScanner.l"
     #include <stdio.h>
 
+    #include "../../lib/include/Globals.h"
     #include "AssemblyParser.tab.h"
 
+    // #define FILTER(n) \
+    //     printf("%s\n", #n);
     #define FILTER(n) \
-        printf("%s\n", #n);
-#line 490 "lex.yy.c"
-#line 491 "lex.yy.c"
+        col += yyleng; \
+        return n;
+    
+    #define LINEBUF_SIZE 256
+    #define YY_NO_UNPUT
+    #define YY_NO_INPUT
+
+    FILE* yyin;
+#line 501 "src/parser/output/AssemblyScanner.flex.c"
+#line 502 "src/parser/output/AssemblyScanner.flex.c"
 
 #define INITIAL 0
 
@@ -704,10 +715,10 @@ YY_DECL
 		}
 
 	{
-#line 10 "AssemblyScanner.l"
+#line 20 "src/parser/AssemblyScanner.l"
 
 
-#line 711 "lex.yy.c"
+#line 722 "src/parser/output/AssemblyScanner.flex.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -766,77 +777,77 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 12 "AssemblyScanner.l"
+#line 22 "src/parser/AssemblyScanner.l"
 { FILTER(SET); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 13 "AssemblyScanner.l"
+#line 23 "src/parser/AssemblyScanner.l"
 { FILTER(ADD); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 14 "AssemblyScanner.l"
+#line 24 "src/parser/AssemblyScanner.l"
 { FILTER(SUB); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 15 "AssemblyScanner.l"
+#line 25 "src/parser/AssemblyScanner.l"
 { FILTER(MUL); }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 16 "AssemblyScanner.l"
+#line 26 "src/parser/AssemblyScanner.l"
 { FILTER(DIV); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 17 "AssemblyScanner.l"
+#line 27 "src/parser/AssemblyScanner.l"
 { FILTER(SHFL); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 18 "AssemblyScanner.l"
+#line 28 "src/parser/AssemblyScanner.l"
 { FILTER(SHFR); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 19 "AssemblyScanner.l"
+#line 29 "src/parser/AssemblyScanner.l"
 { FILTER(SHFRA); }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 20 "AssemblyScanner.l"
+#line 30 "src/parser/AssemblyScanner.l"
 { FILTER(MEM_READ); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 21 "AssemblyScanner.l"
+#line 31 "src/parser/AssemblyScanner.l"
 { FILTER(MEM_WRITE); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 22 "AssemblyScanner.l"
+#line 32 "src/parser/AssemblyScanner.l"
 { FILTER(OUT); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 23 "AssemblyScanner.l"
+#line 33 "src/parser/AssemblyScanner.l"
 { FILTER(END); }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 25 "AssemblyScanner.l"
+#line 35 "src/parser/AssemblyScanner.l"
 { FILTER(REG_VAL); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 26 "AssemblyScanner.l"
+#line 36 "src/parser/AssemblyScanner.l"
 { FILTER(HEX_VAL); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 27 "AssemblyScanner.l"
+#line 37 "src/parser/AssemblyScanner.l"
 { FILTER(DEC_VAL); }
 	YY_BREAK
 case 16:
@@ -844,32 +855,46 @@ case 16:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-#line 29 "AssemblyScanner.l"
-{  }
+#line 39 "src/parser/AssemblyScanner.l"
+{ col = 0;
+                                      row++;
+                                    }
 	YY_BREAK
 case 17:
 /* rule 17 can match eol */
 YY_RULE_SETUP
-#line 30 "AssemblyScanner.l"
-{  }
+#line 42 "src/parser/AssemblyScanner.l"
+{ for (int i = 0; i < yyleng; i++) {
+                                          char c = yytext[i];
+                                          if (c == '\n') {
+                                              row++;
+                                              col = 0;
+                                          } else {
+                                              col++;
+                                          }
+                                      }
+                                    }
 	YY_BREAK
 case 18:
 /* rule 18 can match eol */
 YY_RULE_SETUP
-#line 32 "AssemblyScanner.l"
-{  }
+#line 53 "src/parser/AssemblyScanner.l"
+{ row ++;
+                                      col = 0;
+                                      yyless(1);
+                                    }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 33 "AssemblyScanner.l"
-{  }
+#line 57 "src/parser/AssemblyScanner.l"
+{ col += yyleng; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 34 "AssemblyScanner.l"
+#line 58 "src/parser/AssemblyScanner.l"
 ECHO;
 	YY_BREAK
-#line 873 "lex.yy.c"
+#line 898 "src/parser/output/AssemblyScanner.flex.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1874,4 +1899,4 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 34 "AssemblyScanner.l"
+#line 58 "src/parser/AssemblyScanner.l"

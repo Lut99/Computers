@@ -62,17 +62,19 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "AssemblyParser.y" /* yacc.c:339  */
+#line 1 "src/parser/AssemblyParser.y" /* yacc.c:339  */
 
 
 
 #include <stdio.h>
 
-extern int yylex();
+#include "../../lib/include/Globals.h"
+
+extern "C" int yylex();
 static int yyerror( char *errname);
 
 
-#line 76 "AssemblyParser.tab.c" /* yacc.c:339  */
+#line 78 "src/parser/output/AssemblyParser.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -92,8 +94,8 @@ static int yyerror( char *errname);
 
 /* In a future release of Bison, this section will be replaced
    by #include "AssemblyParser.tab.h".  */
-#ifndef YY_YY_ASSEMBLYPARSER_TAB_H_INCLUDED
-# define YY_YY_ASSEMBLYPARSER_TAB_H_INCLUDED
+#ifndef YY_YY_SRC_PARSER_OUTPUT_ASSEMBLYPARSER_TAB_H_INCLUDED
+# define YY_YY_SRC_PARSER_OUTPUT_ASSEMBLYPARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -126,17 +128,32 @@ extern int yydebug;
 #endif
 
 /* Value type.  */
+#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+
+union YYSTYPE
+{
+#line 13 "src/parser/AssemblyParser.y" /* yacc.c:355  */
+
+    int     cint;
+
+#line 140 "src/parser/output/AssemblyParser.tab.c" /* yacc.c:355  */
+};
+
+typedef union YYSTYPE YYSTYPE;
+# define YYSTYPE_IS_TRIVIAL 1
+# define YYSTYPE_IS_DECLARED 1
+#endif
 
 
 extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_ASSEMBLYPARSER_TAB_H_INCLUDED  */
+#endif /* !YY_YY_SRC_PARSER_OUTPUT_ASSEMBLYPARSER_TAB_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
-#line 140 "AssemblyParser.tab.c" /* yacc.c:358  */
+#line 157 "src/parser/output/AssemblyParser.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -435,7 +452,7 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    19,    19
+       0,    25,    25
 };
 #endif
 
@@ -1203,15 +1220,15 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 20 "AssemblyParser.y" /* yacc.c:1646  */
+#line 26 "src/parser/AssemblyParser.y" /* yacc.c:1646  */
     {
         printf("test");
     }
-#line 1211 "AssemblyParser.tab.c" /* yacc.c:1646  */
+#line 1228 "src/parser/output/AssemblyParser.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1215 "AssemblyParser.tab.c" /* yacc.c:1646  */
+#line 1232 "src/parser/output/AssemblyParser.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1439,11 +1456,11 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 24 "AssemblyParser.y" /* yacc.c:1906  */
+#line 30 "src/parser/AssemblyParser.y" /* yacc.c:1906  */
 
 
 static int yyerror( char *error)
 {
-    printf("Error parsing source code (line %d, col %d): %s\n", line, col, error);
+    printf("Error parsing source code (line %ld, col %ld): %s\n", row + (long) 1, col + (long) 1, error);
     return -1;
 }
