@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 12:59:17 PM
  * Last edited:
- *   3/2/2020, 1:07:17 PM
+ *   3/2/2020, 1:13:12 PM
  * Auto updated?
  *   Yes
  *
@@ -16,7 +16,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include "Instructions.h"
+#include "InstrBase.h"
 
 // Define row / columns
 __attribute__((unused)) static int row = 0;

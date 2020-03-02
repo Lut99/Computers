@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 2:18:03 PM
  * Last edited:
- *   3/2/2020, 1:09:56 PM
+ *   3/2/2020, 1:23:08 PM
  * Auto updated?
  *   Yes
  *
@@ -14,12 +14,18 @@
  *   instruction set, so some parsing will have to be done here.
 **/
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <string.h>
 
-#include "parser.tab.h"
+#include "parser/parser.tab.h"
 #include "globals.h"
 #include "instructions.h"
 #include "../../lib/include/InstrBase.h"
+
+
+extern FILE* yyin;
 
 /* Parses given file to a list of instructions. */
 struct instr_list* parse(const char* file_name) {
@@ -27,9 +33,9 @@ struct instr_list* parse(const char* file_name) {
     program = MAKE_INSTR_LIST();
 
     // Open the input file
-    yyin = fopen(input.c_str(), "r");
+    yyin = fopen(file_name, "r");
     if (yyin == NULL) {
-        cerr << endl << "ERROR: Could not open file \"" + input + "\": " << strerror(errno) << endl << endl;
+        fprintf(stderr, "\nERROR: Could not open file \"%s\": %s\n\n", file_name, strerror(errno));
         exit(-1);
     }
     // Run the parser

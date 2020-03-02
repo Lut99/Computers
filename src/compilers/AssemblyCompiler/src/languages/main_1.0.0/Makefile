@@ -5,16 +5,16 @@ FLEX=flex
 BISON=bison
 
 SRC=.
-BIN=../../bin/linux
+BIN=../../../bin/linux
 OBJ=obj
 PARSER=$(SRC)/parser
 
 .PHONY: default
 default: $(BIN)/main_1_0_0.so ;
 
-scanner.flex.c:
+$(PARSER)/scanner.flex.c:
 	$(FLEX) -o $(PARSER)/scanner.flex.c $(SRC)/scanner.l
-parser.tab.c:
+$(PARSER)/parser.tab.c:
 	$(BISON) --defines=$(PARSER)/parser.tab.h --output=$(PARSER)/parser.tab.c $(SRC)/parser.y
 
 $(OBJ)/scanner.o: $(PARSER)/scanner.flex.c
@@ -25,8 +25,8 @@ $(OBJ)/parser.o: $(PARSER)/parser.tab.c
 $(OBJ)/main.o: $(SRC)/main.c
 	$(GCC) $(GCC_ARGS) -fPIC -o $@ -c $<
 
-$(BIN)/main_1_0_0.so: $(OBJ)/parser.o $(OBJ)/scanner.o
-	$(GCC) $(GCC_ARGS) -shared -soname,chaos_main_100.so -o $@ $(OBJ)/parser.o $(OBJ)/scanner.o -lfl
+$(BIN)/main_1_0_0.so: $(OBJ)/parser.o $(OBJ)/scanner.o $(OBJ)/main.o 
+	$(GCC) $(GCC_ARGS) -shared -o $@ $(OBJ)/parser.o $(OBJ)/scanner.o $(OBJ)/main.o -lfl
 
 clean:
 	rm -f $(PARSER)/*.h

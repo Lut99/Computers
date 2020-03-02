@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 11:37:07 AM
  * Last edited:
- *   3/2/2020, 1:11:42 PM
+ *   3/2/2020, 1:22:01 PM
  * Auto updated?
  *   Yes
  *
@@ -36,8 +36,6 @@ using namespace cxxopts;
 using namespace std;
 using namespace Tools;
 
-
-extern "C" FILE* yyin;
 
 // Define the parse and the make functions
 typedef struct instr_list* (*parse_func_t)(const char*);

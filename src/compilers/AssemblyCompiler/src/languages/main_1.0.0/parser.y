@@ -5,8 +5,9 @@
 
 #include "../instructions.h"
 #include "../globals.h"
+#include "../../../lib/include/Tools.h"
 
-extern "C" int yylex();
+extern int yylex();
 static int yyerror( char *err);
 
 %}
@@ -48,7 +49,7 @@ instrs: instrs instr
 
 instr: set_instr
         {
-            $$ = $1
+            $$ = $1;
         }
     ;
 

@@ -1,7 +1,8 @@
 %{
     #include <stdio.h>
 
-    #include "../../lib/include/Globals.h"
+    #include "parser.tab.h"
+    #include "../../../lib/include/Globals.h"
 
     #define FILTER(n) \
         col += yyleng; \
@@ -29,11 +30,11 @@
 "OUT"                               { FILTER(OUT); }
 "END"                               { FILTER(END); }
 
-$[0-9]+                             { yyval = atoi(yytext+1);
+$[0-9]+                             { yylval.reg_val = atoi(yytext+1);
                                       FILTER(REG_VAL); }
-0x[0-9]+                            { yyval = atoi(yytext+2);
+0x[0-9]+                            { yylval.hex_val = yytext+2;
                                       FILTER(HEX_VAL); }
-[0-9]+                              { yyval = atoi(yytext);
+[0-9]+                              { yylval.value = atol(yytext);
                                       FILTER(DEC_VAL); }
 
 "//".*$                             { col = 0;
