@@ -22,11 +22,14 @@ $(OBJ)/scanner.o: $(PARSER)/scanner.flex.c
 $(OBJ)/parser.o: $(PARSER)/parser.tab.c
 	$(GCC) $(GCC_ARGS) -fPIC -o $@ -c $<
 
+$(OBJ)/instructions.o: $(SRC)/instructions.c
+	$(GCC) $(GCC_ARGS) -fPIC -o $@ -c $<
+
 $(OBJ)/main.o: $(SRC)/main.c
 	$(GCC) $(GCC_ARGS) -fPIC -o $@ -c $<
 
-$(BIN)/main_1_0_0.so: $(OBJ)/parser.o $(OBJ)/scanner.o $(OBJ)/main.o 
-	$(GCC) $(GCC_ARGS) -shared -o $@ $(OBJ)/parser.o $(OBJ)/scanner.o $(OBJ)/main.o -lfl
+$(BIN)/main_1_0_0.so: $(OBJ)/parser.o $(OBJ)/scanner.o $(OBJ)/instructions.o $(OBJ)/main.o 
+	$(GCC) $(GCC_ARGS) -shared -o $@ $(OBJ)/parser.o $(OBJ)/scanner.o $(OBJ)/instructions.o $(OBJ)/main.o -lfl
 
 clean:
 	rm -f $(PARSER)/*.h
