@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 11:37:07 AM
  * Last edited:
- *   3/1/2020, 3:02:33 PM
+ *   3/2/2020, 1:11:21 PM
  * Auto updated?
  *   Yes
  *
@@ -39,6 +39,12 @@ using namespace Tools;
 
 extern "C" FILE* yyin;
 
+// Define the parse and the make functions
+typedef struct instr_list* (*parse_func_t)(const char*);
+typedef char* (*compile_func_t)(struct instr*);
+__attribute__((unused)) static parse_func_t parse_func;
+__attribute__((unused)) static compile_func_t compile_func;
+
 /* Loads the two instruction-set dependend functions from given lang_dir, edition and version */
 void* load_instruction_set(string lang_dir, string edition, Version& version) {
     // First, construct the filename
@@ -64,16 +70,16 @@ void* load_instruction_set(string lang_dir, string edition, Version& version) {
     }
 
     // Next, try to load the functions
-    make_instr = (make_instr_t) dlsym(handle, "make_instr");
-    if (make_instr == NULL) {
+    parse_func = (parse_func_t) dlsym(handle, "parse");
+    if (parse_func == NULL) {
         dlclose(handle);
-        cerr << endl << "ERROR: Could not load function \"make_instr\" from library \"" << filename << "\":" << dlerror() << endl << endl;
+        cerr << endl << "ERROR: Could not load function \"parse\" from library \"" << filename << "\":" << dlerror() << endl << endl;
         exit(-1);
     }
-    compile_instr = (compile_instr_t) dlsym(handle, "compile_instr");
-    if (compile_instr == NULL) {
+    compile_func = (compile_func_t) dlsym(handle, "compile");
+    if (compile_func == NULL) {
         dlclose(handle);
-        cerr << endl << "ERROR: Could not load function \"make_instr\" from library \"" << filename << "\":" << dlerror() << endl << endl;
+        cerr << endl << "ERROR: Could not load function \"compile\" from library \"" << filename << "\":" << dlerror() << endl << endl;
         exit(-1);
     }
 
@@ -90,7 +96,7 @@ void write_binary(string output_file, struct instr_list* list) {
 
     // Loop and write
     for (unsigned long i = 0; i < list->len; i++) {
-        char* exec = compile_instr(list->items[i]);
+        char* exec = compile_func(list->items[i]);
         out << exec;
         free(exec);
     }
@@ -111,8 +117,8 @@ int main(int argc, char** argv) {
         ("E,edition", "The string identifier of the Chaos edition that needs to be compiled. Default is the general purpose desktop branch.", value<string>())
         ("V,version", "The string identifier of the Chaos version of the selected edition that needs to be compiled. Default is the most recent.", value<Version>())
         ("i,input", "The name of the input file.", value<string>())
-        ("o,output", "The name of the output file.", value<string>())
-        ("l,lang_dir", "Directory where all binaries for each language is located.", value<string>())
+        ("o,output", "The name of the output file (default: 'output.cex').", value<string>())
+        ("l,lang_dir", "Directory where all binaries for each language is located (default: 'bin/linux/lang/').", value<string>())
         ("v,verbose", "If given, prints debug texts.")
         ;
     arguments.parse_positional("input");
@@ -171,7 +177,8 @@ int main(int argc, char** argv) {
     // First, load the instruction library
     void* dl_handle = load_instruction_set(lang_dir, edition, version);
 
-    
+    // Let it parse
+    struct instr_list* program = parse_func(input.c_str());
 
     // Write the list to a file
     write_binary(output, program);

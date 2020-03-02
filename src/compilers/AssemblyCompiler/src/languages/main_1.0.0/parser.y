@@ -14,8 +14,8 @@ static int yyerror( char *err);
 %union {
     int                 reg_val;
     char*               hex_val;
-    unsigned long       dec_val;
-    struct instr_list*  program;
+    long                value;
+    struct instr_list*  instruction_list;
     struct instr*       instruction;
 }
 
@@ -23,23 +23,27 @@ static int yyerror( char *err);
 %token MEM_READ MEM_WRITE OUT END
 %token<reg_val> REG_VAL
 %token<hex_val> HEX_VAL
-%token<dec_val> DEC_VAL
+%token<value> DEC_VAL
 
-%type<program> start instrs
+%type<instruction_list> start instrs
 %type<instruction> instr set_instr
+%type<value> value
 
 %start start
 
 %%
 
 start: instrs
-        {
-            $$ = $1;
-        }
     ;
 
 instrs: instrs instr
+        {
+            append_instr(program, $2);
+        }
     | instr
+        {
+            append_instr(program, $1);
+        }
     ;
 
 instr: set_instr
@@ -48,17 +52,23 @@ instr: set_instr
         }
     ;
 
-set_instr: SET REG_VAL HEX_VAL
-        {
-            $$ = SET_make(0, (char) $2, readHex($3));
-        }
-    | SET REG_VAL DEC_VAL
+set_instr: SET REG_VAL value
         {
             $$ = SET_make(0, (char) $2, $3);
         }
     | SET REG_VAL REG_VAL
         {
             $$ = SET_make(1, (char) $2, $3);
+        }
+    ;
+
+value: HEX_VAL
+        {
+            $$ = string_to_hex($1);
+        }
+    | DEC_VAL
+        {
+            $$ = $1;
         }
     ;
 

@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 2:18:03 PM
  * Last edited:
- *   3/1/2020, 3:02:25 PM
+ *   3/2/2020, 1:09:56 PM
  * Auto updated?
  *   Yes
  *
@@ -22,7 +22,7 @@
 #include "../../lib/include/InstrBase.h"
 
 /* Parses given file to a list of instructions. */
-struct instr_list* parse(char* file_name) {
+struct instr_list* parse(const char* file_name) {
     // Init the instructions list
     program = MAKE_INSTR_LIST();
 
