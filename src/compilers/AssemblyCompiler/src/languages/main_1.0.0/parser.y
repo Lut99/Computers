@@ -5,10 +5,12 @@
 
 #include "../instructions.h"
 #include "../globals.h"
-#include "../../../lib/include/Tools.h"
+#include "../../Tools.h"
 
 extern int yylex();
 static int yyerror( char *err);
+
+extern FILE* yyin;
 
 %}
 
@@ -81,4 +83,8 @@ static int yyerror( char *error)
 {
     printf("Error parsing source code (line %ld, col %ld): %s\n", row + (long) 1, col + (long) 1, error);
     return -1;
+}
+
+void set_yyin(FILE* target) {
+    yyin = target;
 }

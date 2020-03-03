@@ -70,7 +70,7 @@
 
 #include "../instructions.h"
 #include "../globals.h"
-#include "../../../lib/include/Tools.h"
+#include "../../Tools.h"
 
 extern int yylex();
 static int yyerror( char *err);

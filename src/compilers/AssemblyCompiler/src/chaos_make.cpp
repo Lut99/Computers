@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 11:37:07 AM
  * Last edited:
- *   3/3/2020, 8:17:02 PM
+ *   3/3/2020, 9:14:29 PM
  * Auto updated?
  *   Yes
  *
@@ -32,8 +32,10 @@ using namespace Tools;
 
 
 // Define the parse and the make functions
-typedef char* (*compile_func_t)(const char* filename);
-__attribute__((unused)) static compile_func_t compile_func;
+typedef void (*compile_func_t)();
+typedef void (*set_yyin_t)(FILE*);
+compile_func_t compile_func;
+set_yyin_t set_yyin;
 
 /* Loads the two instruction-set dependend functions from given lang_dir, edition and version */
 void* load_instruction_set(string lang_dir, string edition, Version& version) {
@@ -59,11 +61,17 @@ void* load_instruction_set(string lang_dir, string edition, Version& version) {
         exit(-1);
     }
 
-    // Next, try to load the function
-    compile_func = (compile_func_t) dlsym(handle, "compile");
+    // Next, try to load the functions
+    compile_func = (compile_func_t) dlsym(handle, "yyparse");
     if (compile_func == NULL) {
         dlclose(handle);
         cerr << endl << "ERROR: failed to load compile_func: " << filename << "\":" << dlerror() << endl << endl;
+        exit(-1);
+    }
+    set_yyin = (set_yyin_t) dlsym(handle, "set_yyin");
+    if (compile_func == NULL) {
+        dlclose(handle);
+        cerr << endl << "ERROR: failed to load set_yyin: " << filename << "\":" << dlerror() << endl << endl;
         exit(-1);
     }
 
@@ -157,11 +165,26 @@ int main(int argc, char** argv) {
     // First, load the instruction library
     void* dl_handle = load_instruction_set(lang_dir, edition, version);
 
-    // Let it parse
-    char* program = compile_func(input.c_str());
+    // Open the files needed to handle this
+    FILE* in = fopen(input.c_str(), "r");
+    if (in == NULL) {
+        cerr << endl << "ERROR: Could not open file \"" << input << "\": " << strerror(errno) << endl << endl;
+        exit(-1);
+    }
+    FILE* out = fopen(output.c_str(), "w");
+    if (out == NULL) {
+        fclose(in);
+        cerr << endl << "ERROR: Could not open file \"" << output << "\": " << strerror(errno) << endl << endl;
+        exit(-1);
+    }
 
-    // Write the list to a file
-    write_binary(output, program);
+    // Run the compiler
+    set_yyin(in);
+    compile_func();
+
+    // Close the files
+    fclose(in);
+    fclose(out);
 
     // Close the handle
     dlclose(dl_handle);

@@ -2,8 +2,8 @@
     #include <stdio.h>
 
     #include "parser.tab.h"
-    #include "../../../lib/include/Globals.h"
-    #include "../../../lib/include/Tools.h"
+    #include "../../Globals.h"
+    #include "../../Tools.h"
 
     #define FILTER(n) \
         col += yyleng; \

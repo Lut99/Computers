@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 2:18:03 PM
  * Last edited:
- *   3/3/2020, 8:20:11 PM
+ *   3/3/2020, 9:02:44 PM
  * Auto updated?
  *   Yes
  *
@@ -27,32 +27,15 @@
 
 extern FILE* yyin;
 
-/* Parses given file to a list of instructions. */
-struct instr_list* parse(const char* file_name) {
+/* Compiles an instruction to binary code */
+void compile(const char* input, const char* output) {
     // Init the instructions list
     program = MAKE_INSTR_LIST();
 
-    // Open the input file
-    yyin = fopen(file_name, "r");
-    if (yyin == NULL) {
-        fprintf(stderr, "\nERROR: Could not open file \"%s\": %s\n\n", file_name, strerror(errno));
-        exit(-1);
+    for (int i = 0; i < program->len; i++) {
+        struct instr* ins = program->items[i];
+        if (ins->id == 0x00) {
+            SET_compile(ins);
+        }
     }
-    // Run the parser
-    yyparse();
-    // Close the input again
-    fclose(yyin);
-
-    // Return the list of instructions
-    return program;
-}
-
-/* Compiles an instruction to binary code */
-char* compile(struct instr* i) {
-    if (i->id == 0x00) {
-        return SET_compile((struct SET_instr*) i);
-    }
-
-    // In theory, we should never get to this point
-    return NULL;
 }

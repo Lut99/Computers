@@ -10,7 +10,7 @@ SRC=src
 BIN=bin/linux
 OBJ=$(BIN)/obj
 
-LIBRARIES = $(OBJ)/InstrBase.o $(OBJ)/chaos_make.o $(OBJ)/Version.o
+LIBRARIES = $(OBJ)/chaos_make.o $(OBJ)/Version.o
 
 OPTS=
 
