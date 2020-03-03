@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 11:37:07 AM
  * Last edited:
- *   3/2/2020, 1:22:01 PM
+ *   3/3/2020, 8:17:02 PM
  * Auto updated?
  *   Yes
  *
@@ -23,12 +23,6 @@
 #include <cstring>
 #include <cerrno>
 
-extern "C" {
-#include "lib/include/InstrBase.h"
-}
-#include "parser/output/AssemblyParser.tab.h"
-#include "lib/include/Globals.h"
-
 #include "lib/include/Version.hpp"
 #include "lib/include/cxxopts.hpp"
 
@@ -38,9 +32,7 @@ using namespace Tools;
 
 
 // Define the parse and the make functions
-typedef struct instr_list* (*parse_func_t)(const char*);
-typedef char* (*compile_func_t)(struct instr*);
-__attribute__((unused)) static parse_func_t parse_func;
+typedef char* (*compile_func_t)(const char* filename);
 __attribute__((unused)) static compile_func_t compile_func;
 
 /* Loads the two instruction-set dependend functions from given lang_dir, edition and version */
@@ -51,7 +43,7 @@ void* load_instruction_set(string lang_dir, string edition, Version& version) {
     sstr << edition;
     sstr << "_";
     string v = to_string(version);
-    for (int i = 0; i < v.size(); i++) {
+    for (size_t i = 0; i < v.size(); i++) {
         if (v[i] == '.') {
             v[i] = '_';
         }
@@ -63,21 +55,15 @@ void* load_instruction_set(string lang_dir, string edition, Version& version) {
     // Try to open the library
     void* handle = dlopen(filename.c_str(), RTLD_NOW);
     if (handle == NULL) {
-        cerr << endl << "ERROR: Could not open library \"" << filename << "\"" << endl << endl;
+        cerr << endl << "ERROR: failed to load library: " << dlerror() << endl << endl;
         exit(-1);
     }
 
-    // Next, try to load the functions
-    parse_func = (parse_func_t) dlsym(handle, "parse");
-    if (parse_func == NULL) {
-        dlclose(handle);
-        cerr << endl << "ERROR: Could not load function \"parse\" from library \"" << filename << "\":" << dlerror() << endl << endl;
-        exit(-1);
-    }
+    // Next, try to load the function
     compile_func = (compile_func_t) dlsym(handle, "compile");
     if (compile_func == NULL) {
         dlclose(handle);
-        cerr << endl << "ERROR: Could not load function \"compile\" from library \"" << filename << "\":" << dlerror() << endl << endl;
+        cerr << endl << "ERROR: failed to load compile_func: " << filename << "\":" << dlerror() << endl << endl;
         exit(-1);
     }
 
@@ -85,19 +71,15 @@ void* load_instruction_set(string lang_dir, string edition, Version& version) {
 }
 
 /* Writes given list of instructions to target binary file. */
-void write_binary(string output_file, struct instr_list* list) {
+void write_binary(string output_file, char* program) {
     ofstream out(output_file, ostream::binary);
     if (!out.is_open()) {
         cerr << endl << "ERROR: Could not open file \"" + output_file + "\": " << strerror(errno) << endl << endl;
         exit(-1);
     }
 
-    // Loop and write
-    for (unsigned long i = 0; i < list->len; i++) {
-        char* exec = compile_func(list->items[i]);
-        out << exec;
-        free(exec);
-    }
+    // Write the program
+    out << program;
 
     // Close the file
     out.close();
@@ -176,13 +158,10 @@ int main(int argc, char** argv) {
     void* dl_handle = load_instruction_set(lang_dir, edition, version);
 
     // Let it parse
-    struct instr_list* program = parse_func(input.c_str());
+    char* program = compile_func(input.c_str());
 
     // Write the list to a file
     write_binary(output, program);
-
-    // Free the instructions list
-    FREE_INSTR_LIST(program);
 
     // Close the handle
     dlclose(dl_handle);

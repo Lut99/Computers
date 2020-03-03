@@ -14,7 +14,7 @@ static int yyerror( char *err);
 
 %union {
     int                 reg_val;
-    char*               hex_val;
+    struct string*      hex_val;
     long                value;
     struct instr_list*  instruction_list;
     struct instr*       instruction;
@@ -65,7 +65,9 @@ set_instr: SET REG_VAL value
 
 value: HEX_VAL
         {
-            $$ = string_to_hex($1);
+            $$ = (long) string_to_hex($1);
+            // Don't forget to deallocate the object
+            FREE_STRING($1);
         }
     | DEC_VAL
         {

@@ -30,8 +30,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_SRC_PARSER_OUTPUT_ASSEMBLYPARSER_TAB_H_INCLUDED
-# define YY_YY_SRC_PARSER_OUTPUT_ASSEMBLYPARSER_TAB_H_INCLUDED
+#ifndef YY_YY_PARSER_PARSER_TAB_H_INCLUDED
+# define YY_YY_PARSER_PARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -58,8 +58,8 @@ extern int yydebug;
     OUT = 268,
     END = 269,
     REG_VAL = 270,
-    DEC_VAL = 271,
-    HEX_VAL = 272
+    HEX_VAL = 271,
+    DEC_VAL = 272
   };
 #endif
 
@@ -68,11 +68,15 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 13 "src/parser/AssemblyParser.y" /* yacc.c:1909  */
+#line 15 "./parser.y" /* yacc.c:1909  */
 
-    int     cint;
+    int                 reg_val;
+    struct string*      hex_val;
+    long                value;
+    struct instr_list*  instruction_list;
+    struct instr*       instruction;
 
-#line 76 "src/parser/output/AssemblyParser.tab.h" /* yacc.c:1909  */
+#line 80 "./parser/parser.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -85,4 +89,4 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_SRC_PARSER_OUTPUT_ASSEMBLYPARSER_TAB_H_INCLUDED  */
+#endif /* !YY_YY_PARSER_PARSER_TAB_H_INCLUDED  */

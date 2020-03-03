@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 2:55:54 PM
  * Last edited:
- *   3/2/2020, 12:54:25 PM
+ *   3/3/2020, 8:20:21 PM
  * Auto updated?
  *   Yes
  *
@@ -13,7 +13,7 @@
  *   this instruction set, and also convenient make functions.
 **/
 
-#include "../../lib/include/Tools.h"
+#include "../Tools.h"
 #include "instructions.h"
 
 

@@ -4,7 +4,7 @@
  * Created:
  *   3/2/2020, 12:53:37 PM
  * Last edited:
- *   3/2/2020, 12:55:56 PM
+ *   3/3/2020, 7:48:48 PM
  * Auto updated?
  *   Yes
  *
@@ -17,10 +17,21 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
+/* Struct for storing a string together with it's length */
+struct string {
+    char* data;
+    int length;
+};
+
+/* Returns a newly allocated string object */
+struct string* MAKE_STRING(char* data, int length);
+/* Frees given string object. */
+void FREE_STRING(struct string* s);
+
 /* Converts given long to a byte array. */
 void long_to_char(long number, char* result);
 
 /* Reads a string that contains a hexidecimal number, and returns the value of that number (assumes the hexadecimal has correct structure). */
-long string_to_hex(char* hex_str);
+unsigned long string_to_hex(struct string* s);
 
 #endif

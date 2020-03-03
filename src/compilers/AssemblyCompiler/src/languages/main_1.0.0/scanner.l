@@ -3,6 +3,7 @@
 
     #include "parser.tab.h"
     #include "../../../lib/include/Globals.h"
+    #include "../../../lib/include/Tools.h"
 
     #define FILTER(n) \
         col += yyleng; \
@@ -32,7 +33,7 @@
 
 $[0-9]+                             { yylval.reg_val = atoi(yytext+1);
                                       FILTER(REG_VAL); }
-0x[0-9]+                            { yylval.hex_val = yytext+2;
+0x[0-9a-fA-F]+                      { yylval.hex_val = MAKE_STRING(yytext+2, yyleng);
                                       FILTER(HEX_VAL); }
 [0-9]+                              { yylval.value = atol(yytext);
                                       FILTER(DEC_VAL); }

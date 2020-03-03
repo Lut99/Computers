@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 11:45:27 AM
  * Last edited:
- *   3/1/2020, 2:22:05 PM
+ *   3/3/2020, 7:32:28 PM
  * Auto updated?
  *   Yes
  *
@@ -109,6 +109,6 @@ istream& Tools::operator>>(istream& is, Version& v) {
     return is;
 }
 
-std::string to_string(const Version& v) {
+std::string Tools::to_string(const Version& v) {
     return (std::to_string(v.major_num) + "." + std::to_string(v.minor_num) + "." + std::to_string(v.tiny_num));
 }

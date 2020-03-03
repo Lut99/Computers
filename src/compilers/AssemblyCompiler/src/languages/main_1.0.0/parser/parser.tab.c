@@ -62,19 +62,21 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "src/parser/AssemblyParser.y" /* yacc.c:339  */
+#line 1 "./parser.y" /* yacc.c:339  */
 
 
 
 #include <stdio.h>
 
-#include "../../lib/include/Globals.h"
+#include "../instructions.h"
+#include "../globals.h"
+#include "../../../lib/include/Tools.h"
 
-extern "C" int yylex();
-static int yyerror( char *errname);
+extern int yylex();
+static int yyerror( char *err);
 
 
-#line 78 "src/parser/output/AssemblyParser.tab.c" /* yacc.c:339  */
+#line 80 "./parser/parser.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -93,9 +95,9 @@ static int yyerror( char *errname);
 #endif
 
 /* In a future release of Bison, this section will be replaced
-   by #include "AssemblyParser.tab.h".  */
-#ifndef YY_YY_SRC_PARSER_OUTPUT_ASSEMBLYPARSER_TAB_H_INCLUDED
-# define YY_YY_SRC_PARSER_OUTPUT_ASSEMBLYPARSER_TAB_H_INCLUDED
+   by #include "parser.tab.h".  */
+#ifndef YY_YY_PARSER_PARSER_TAB_H_INCLUDED
+# define YY_YY_PARSER_PARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -122,8 +124,8 @@ extern int yydebug;
     OUT = 268,
     END = 269,
     REG_VAL = 270,
-    DEC_VAL = 271,
-    HEX_VAL = 272
+    HEX_VAL = 271,
+    DEC_VAL = 272
   };
 #endif
 
@@ -132,11 +134,15 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 13 "src/parser/AssemblyParser.y" /* yacc.c:355  */
+#line 15 "./parser.y" /* yacc.c:355  */
 
-    int     cint;
+    int                 reg_val;
+    struct string*      hex_val;
+    long                value;
+    struct instr_list*  instruction_list;
+    struct instr*       instruction;
 
-#line 140 "src/parser/output/AssemblyParser.tab.c" /* yacc.c:355  */
+#line 146 "./parser/parser.tab.c" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -149,11 +155,11 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_SRC_PARSER_OUTPUT_ASSEMBLYPARSER_TAB_H_INCLUDED  */
+#endif /* !YY_YY_PARSER_PARSER_TAB_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
-#line 157 "src/parser/output/AssemblyParser.tab.c" /* yacc.c:358  */
+#line 163 "./parser/parser.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -393,18 +399,18 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  3
+#define YYFINAL  7
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   1
+#define YYLAST   6
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  18
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  2
+#define YYNNTS  6
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  2
+#define YYNRULES  9
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  4
+#define YYNSTATES  13
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
@@ -452,7 +458,7 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    25,    25
+       0,    37,    37,    40,    44,    50,    56,    60,    66,    72
 };
 #endif
 
@@ -463,7 +469,8 @@ static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "SET", "ADD", "SUB", "MUL", "DIV",
   "SHFL", "SHFR", "SHFRA", "MEM_READ", "MEM_WRITE", "OUT", "END",
-  "REG_VAL", "DEC_VAL", "HEX_VAL", "$accept", "result", YY_NULLPTR
+  "REG_VAL", "HEX_VAL", "DEC_VAL", "$accept", "start", "instrs", "instr",
+  "set_instr", "value", YY_NULLPTR
 };
 #endif
 
@@ -477,10 +484,10 @@ static const yytype_uint16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF -4
+#define YYPACT_NINF -16
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-4)))
+  (!!((Yystate) == (-16)))
 
 #define YYTABLE_NINF -1
 
@@ -491,7 +498,8 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -3,    -4,     1,    -4
+       0,   -11,     5,     0,   -16,   -16,   -15,   -16,   -16,   -16,
+     -16,   -16,   -16
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -499,19 +507,20 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     2,     0,     1
+       0,     0,     0,     2,     4,     5,     0,     1,     3,     7,
+       8,     9,     6
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -4,    -4
+     -16,   -16,   -16,     3,   -16,   -16
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2
+      -1,     2,     3,     4,     5,    12
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -519,31 +528,32 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-       1,     3
+       9,    10,    11,     1,     6,     7,     8
 };
 
 static const yytype_uint8 yycheck[] =
 {
-       3,     0
+      15,    16,    17,     3,    15,     0,     3
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,    19,     0
+       0,     3,    19,    20,    21,    22,    15,     0,    21,    15,
+      16,    17,    23
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    18,    19
+       0,    18,    19,    20,    20,    21,    22,    22,    23,    23
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     1
+       0,     2,     1,     2,     1,     1,     3,     3,     1,     1
 };
 
 
@@ -1219,16 +1229,66 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 2:
-#line 26 "src/parser/AssemblyParser.y" /* yacc.c:1646  */
+        case 3:
+#line 41 "./parser.y" /* yacc.c:1646  */
     {
-        printf("test");
-    }
-#line 1228 "src/parser/output/AssemblyParser.tab.c" /* yacc.c:1646  */
+            append_instr(program, (yyvsp[0].instruction));
+        }
+#line 1238 "./parser/parser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 4:
+#line 45 "./parser.y" /* yacc.c:1646  */
+    {
+            append_instr(program, (yyvsp[0].instruction));
+        }
+#line 1246 "./parser/parser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 5:
+#line 51 "./parser.y" /* yacc.c:1646  */
+    {
+            (yyval.instruction) = (yyvsp[0].instruction);
+        }
+#line 1254 "./parser/parser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 6:
+#line 57 "./parser.y" /* yacc.c:1646  */
+    {
+            (yyval.instruction) = SET_make(0, (char) (yyvsp[-1].reg_val), (yyvsp[0].value));
+        }
+#line 1262 "./parser/parser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 7:
+#line 61 "./parser.y" /* yacc.c:1646  */
+    {
+            (yyval.instruction) = SET_make(1, (char) (yyvsp[-1].reg_val), (yyvsp[0].reg_val));
+        }
+#line 1270 "./parser/parser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 8:
+#line 67 "./parser.y" /* yacc.c:1646  */
+    {
+            (yyval.value) = (long) string_to_hex((yyvsp[0].hex_val));
+            // Don't forget to deallocate the object
+            FREE_STRING((yyvsp[0].hex_val));
+        }
+#line 1280 "./parser/parser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 9:
+#line 73 "./parser.y" /* yacc.c:1646  */
+    {
+            (yyval.value) = (yyvsp[0].value);
+        }
+#line 1288 "./parser/parser.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1232 "src/parser/output/AssemblyParser.tab.c" /* yacc.c:1646  */
+#line 1292 "./parser/parser.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1456,7 +1516,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 30 "src/parser/AssemblyParser.y" /* yacc.c:1906  */
+#line 78 "./parser.y" /* yacc.c:1906  */
 
 
 static int yyerror( char *error)

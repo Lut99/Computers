@@ -10,21 +10,27 @@ SRC=src
 BIN=bin/linux
 OBJ=$(BIN)/obj
 
-LIBRARIES = $(OBJ)/Instructions.o $(OBJ)/AssemblyParser.o $(OBJ)/AssemblyScanner.o $(OBJ)/chaos_make.o $(OBJ)/Version.o
+LIBRARIES = $(OBJ)/InstrBase.o $(OBJ)/chaos_make.o $(OBJ)/Version.o
+
+OPTS=
+
+ifdef DEBUG
+OPTS+= -g
+endif
 
 .PHONY: default
 default: $(BIN)/chaos_make.out ;
 
 $(OBJ)/chaos_make.o: $(SRC)/chaos_make.cpp
-	$(GXX) $(GXX_ARGS) -o $@ -c $<
+	$(GXX) $(GXX_ARGS) $(OPTS) -o $@ -c $<
 
 $(OBJ)/%.o: $(SRC)/lib/%.cpp
-	$(GXX) $(GXX_ARGS) -o $@ -c $<
+	$(GXX) $(GXX_ARGS) $(OPTS) -o $@ -c $<
 $(OBJ)/%.o: $(SRC)/lib/%.c
-	$(GCC) $(GCC_ARGS) -o $@ -c $<
+	$(GCC) $(GCC_ARGS) $(OPTS) -o $@ -c $<
 
 $(BIN)/chaos_make.out: $(LIBRARIES)
-	$(GXX) $(GXX_ARGS) -o $@ $(LIBRARIES) -lfl -ldl
+	$(GXX) $(GXX_ARGS) $(OPTS) -o $@ $(LIBRARIES) -lfl -ldl
 
 clean:
 	rm -f $(BIN)/*.out

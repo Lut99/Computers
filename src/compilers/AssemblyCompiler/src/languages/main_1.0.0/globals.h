@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 2:37:30 PM
  * Last edited:
- *   3/1/2020, 2:41:57 PM
+ *   3/3/2020, 8:18:30 PM
  * Auto updated?
  *   Yes
  *
@@ -15,7 +15,7 @@
 
 #ifndef GLOBALS_H
 // Load the main globals
-#include "../../lib/include/Globals.h"
+#include "../Globals.h"
 
 // Define the list of instructions
 __attribute__((unused)) static struct instr_list* program = NULL;

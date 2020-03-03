@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 2:18:03 PM
  * Last edited:
- *   3/2/2020, 1:23:08 PM
+ *   3/3/2020, 8:20:11 PM
  * Auto updated?
  *   Yes
  *
@@ -22,7 +22,7 @@
 #include "parser/parser.tab.h"
 #include "globals.h"
 #include "instructions.h"
-#include "../../lib/include/InstrBase.h"
+#include "../InstrBase.h"
 
 
 extern FILE* yyin;
