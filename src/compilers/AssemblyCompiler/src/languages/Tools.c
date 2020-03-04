@@ -4,7 +4,7 @@
  * Created:
  *   3/2/2020, 12:53:25 PM
  * Last edited:
- *   3/3/2020, 8:18:09 PM
+ *   3/4/2020, 9:05:48 PM
  * Auto updated?
  *   Yes
  *
@@ -51,9 +51,10 @@ unsigned long string_to_hex(struct string* s) {
     //   that there is no leading 0x, and there are only numbers and a-f and
     //   A-F.
     unsigned long res = 0;
+    unsigned long added = 1;
     for (int i = 0; i < s->length; i++) {
         char c = s->data[s->length - 1 - i];
-        int val;
+        unsigned long val;
         if (c >= '0' && c <= '9') {
             // Simply substract the number and add, times the place
             val = c - '0';
@@ -62,7 +63,9 @@ unsigned long string_to_hex(struct string* s) {
         } else {
             val = 10 + (c - 'A');
         }
-        res += val * (16 * i);
+        res += val * added;
+
+        added *= 16;
     }
     return res;
 }

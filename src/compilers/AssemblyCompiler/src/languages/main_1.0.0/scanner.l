@@ -33,7 +33,7 @@
 
 $[0-9]+                             { yylval.reg_val = atoi(yytext+1);
                                       FILTER(REG_VAL); }
-0x[0-9a-fA-F]+                      { yylval.hex_val = MAKE_STRING(yytext+2, yyleng);
+0x[0-9a-fA-F]+                      { yylval.hex_val = MAKE_STRING(yytext+2, yyleng-2);
                                       FILTER(HEX_VAL); }
 [0-9]+                              { yylval.value = atol(yytext);
                                       FILTER(DEC_VAL); }

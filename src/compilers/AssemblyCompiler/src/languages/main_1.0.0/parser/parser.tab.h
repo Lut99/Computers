@@ -68,11 +68,11 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 15 "./parser.y" /* yacc.c:1909  */
+#line 18 "./parser.y" /* yacc.c:1909  */
 
     int                 reg_val;
     struct string*      hex_val;
-    long                value;
+    unsigned long       value;
     struct instr_list*  instruction_list;
     struct instr*       instruction;
 

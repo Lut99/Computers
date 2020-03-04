@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 11:37:07 AM
  * Last edited:
- *   3/3/2020, 9:14:29 PM
+ *   3/4/2020, 8:21:26 PM
  * Auto updated?
  *   Yes
  *
@@ -33,9 +33,10 @@ using namespace Tools;
 
 // Define the parse and the make functions
 typedef void (*compile_func_t)();
-typedef void (*set_yyin_t)(FILE*);
+typedef void (*set_file_func_t)(FILE*);
 compile_func_t compile_func;
-set_yyin_t set_yyin;
+set_file_func_t set_yyin;
+set_file_func_t set_out;
 
 /* Loads the two instruction-set dependend functions from given lang_dir, edition and version */
 void* load_instruction_set(string lang_dir, string edition, Version& version) {
@@ -68,12 +69,18 @@ void* load_instruction_set(string lang_dir, string edition, Version& version) {
         cerr << endl << "ERROR: failed to load compile_func: " << filename << "\":" << dlerror() << endl << endl;
         exit(-1);
     }
-    set_yyin = (set_yyin_t) dlsym(handle, "set_yyin");
-    if (compile_func == NULL) {
+    set_yyin = (set_file_func_t) dlsym(handle, "set_yyin");
+    if (set_yyin == NULL) {
         dlclose(handle);
         cerr << endl << "ERROR: failed to load set_yyin: " << filename << "\":" << dlerror() << endl << endl;
         exit(-1);
     }
+    set_out = (set_file_func_t) dlsym(handle, "set_out");
+    if (set_out == NULL) {
+        dlclose(handle);
+        cerr << endl << "ERROR: failed to load set_out: " << filename << "\":" << dlerror() << endl << endl;
+        exit(-1);
+    };
 
     return handle;
 }
@@ -180,6 +187,7 @@ int main(int argc, char** argv) {
 
     // Run the compiler
     set_yyin(in);
+    set_out(out);
     compile_func();
 
     // Close the files

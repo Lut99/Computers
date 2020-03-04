@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 2:55:54 PM
  * Last edited:
- *   3/3/2020, 8:20:21 PM
+ *   3/4/2020, 8:43:51 PM
  * Auto updated?
  *   Yes
  *
@@ -17,37 +17,22 @@
 #include "instructions.h"
 
 
-struct SET_instr* SET_make(int variation, char reg, long value) {
-    struct SET_instr* to_ret = (struct SET_instr*) malloc(sizeof(struct SET_instr*));
-    to_ret->id = 0x00;
-    to_ret->t_reg = reg;
-    to_ret->variation = variation;
-    to_ret->value = value;
-    return to_ret;
-}
-
-char* SET_compile(struct SET_instr* instr) {
-    // Determine the size of this instruction
-    int size = 3;
-    if (instr->variation == 1) {
-        size = 10;
-    }
-
-    // Allocate a new array
-    char* to_ret = (char*) malloc(size * sizeof(char));
-    
+void SET_compile(FILE* output, int variation, char reg, long reg_val) {
     // Write the code first
-    to_ret[0] = 0x00 + instr->variation;
+    char c;
+    c = (char) (0x00 + variation);
+    fwrite(&c, sizeof(char), 1, output);
     // Add the target register
-    to_ret[1] = instr->t_reg;
-    // If there is only a char, write that and done
-    if (instr->variation == 0) {
-        to_ret[2] = (char) instr->value;
-    } else {
+    fwrite(&reg, sizeof(char), 1, output);
+    if (variation == 0) {
         // Put the long there
-        long_to_char(instr->value, to_ret + 2);
+        char to_ret[8];
+        long_to_char(reg_val, to_ret);
+        fwrite(to_ret, sizeof(char), 8, output);
+    } else {
+        // If there is only a char, write that and done
+        c = (char) (reg_val & 0xFF);
+        fwrite(&c, sizeof(char), 1, output);
+        printf("Value: %ld\n", reg_val);
     }
-
-    // Return it
-    return to_ret;
 }

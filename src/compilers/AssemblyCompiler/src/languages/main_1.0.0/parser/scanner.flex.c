@@ -843,7 +843,7 @@ YY_RULE_SETUP
 case 14:
 YY_RULE_SETUP
 #line 36 "./scanner.l"
-{ yylval.hex_val = MAKE_STRING(yytext+2, yyleng);
+{ yylval.hex_val = MAKE_STRING(yytext+2, yyleng-2);
                                       FILTER(HEX_VAL); }
 	YY_BREAK
 case 15:

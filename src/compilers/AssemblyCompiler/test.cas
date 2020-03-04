@@ -1,3 +1,5 @@
 // Test for the SET-instruction
 SET $1 0x00
 SET $2 $1
+SET $3 $1
+SET $4 50

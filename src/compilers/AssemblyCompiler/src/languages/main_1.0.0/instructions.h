@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 2:56:15 PM
  * Last edited:
- *   3/2/2020, 12:51:18 PM
+ *   3/4/2020, 7:50:11 PM
  * Auto updated?
  *   Yes
  *
@@ -17,17 +17,9 @@
 #define INSTRUCTIONS_H
 
 #include <stdlib.h>
+#include <stdio.h>
 
-/* SET instruction: sets the value of a register to that of a constant or register. */
-struct SET_instr {
-    char id;
-    int variation;
-    char t_reg;
-    long value;
-};
-/* Fills a SET_instr struct and returns the newly allocated result */
-struct SET_instr* SET_make(int variation, char reg, long value);
 /* Compiles a SET instruction to binary code. */
-char* SET_compile(struct SET_instr* instr);
+void SET_compile(FILE* output, int variation, char reg, long reg_val);
 
 #endif

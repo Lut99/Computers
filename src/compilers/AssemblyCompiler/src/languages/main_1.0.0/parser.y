@@ -11,13 +11,14 @@ extern int yylex();
 static int yyerror( char *err);
 
 extern FILE* yyin;
+FILE* out;
 
 %}
 
 %union {
     int                 reg_val;
     struct string*      hex_val;
-    long                value;
+    unsigned long       value;
     struct instr_list*  instruction_list;
     struct instr*       instruction;
 }
@@ -28,8 +29,7 @@ extern FILE* yyin;
 %token<hex_val> HEX_VAL
 %token<value> DEC_VAL
 
-%type<instruction_list> start instrs
-%type<instruction> instr set_instr
+%nterm start instrs instr set_instr
 %type<value> value
 
 %start start
@@ -39,35 +39,28 @@ extern FILE* yyin;
 start: instrs
     ;
 
-instrs: instrs instr
-        {
-            append_instr(program, $2);
-        }
+instrs: instr instrs
     | instr
-        {
-            append_instr(program, $1);
-        }
     ;
 
 instr: set_instr
-        {
-            $$ = $1;
-        }
     ;
 
 set_instr: SET REG_VAL value
         {
-            $$ = SET_make(0, (char) $2, $3);
+            SET_compile(out, 0, (char) $2, $3);
         }
     | SET REG_VAL REG_VAL
         {
-            $$ = SET_make(1, (char) $2, $3);
+            SET_compile(out, 1, (char) $2, $3);
         }
     ;
 
 value: HEX_VAL
         {
-            $$ = (long) string_to_hex($1);
+            printf("%s %i\n", $1->data, $1->length);
+            $$ = string_to_hex($1);
+            printf("%lu\n", $$);
             // Don't forget to deallocate the object
             FREE_STRING($1);
         }
@@ -87,4 +80,7 @@ static int yyerror( char *error)
 
 void set_yyin(FILE* target) {
     yyin = target;
+}
+void set_out(FILE* target) {
+    out = target;
 }
