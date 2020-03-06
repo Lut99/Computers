@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 #include "../instructions.h"
-#include "../globals.h"
+#include "../../Globals.h"
 #include "../../Tools.h"
 
 extern int yylex();
@@ -16,7 +16,7 @@ FILE* out;
 %}
 
 %union {
-    int                 reg_val;
+    unsigned int        reg_val;
     struct string*      hex_val;
     unsigned long       value;
     struct instr_list*  instruction_list;
@@ -29,8 +29,9 @@ FILE* out;
 %token<hex_val> HEX_VAL
 %token<value> DEC_VAL
 
-%nterm start instrs instr set_instr
+%nterm start instrs instr set_instr add_instr
 %type<value> value
+%type<reg_val> reg_val;
 
 %start start
 
@@ -44,23 +45,44 @@ instrs: instr instrs
     ;
 
 instr: set_instr
+    | add_instr
     ;
 
-set_instr: SET REG_VAL value
+set_instr: SET reg_val value
         {
-            SET_compile(out, 0, (char) $2, $3);
+            SET_compile(out, 0, (unsigned char) $2, $3);
         }
-    | SET REG_VAL REG_VAL
+    | SET reg_val reg_val
         {
-            SET_compile(out, 1, (char) $2, $3);
+            SET_compile(out, 1, (unsigned char) $2, $3);
+        }
+    ;
+
+add_instr: ADD reg_val value value
+        {
+            ADD_compile(out, 0, (unsigned char) $2, $3, $4);
+        }
+    | ADD reg_val reg_val value
+        {
+            ADD_compile(out, 1, (unsigned char) $2, $3, $4);
+        }
+    | ADD reg_val value reg_val
+        {
+            ADD_compile(out, 2, (unsigned char) $2, $3, $4);
+        }
+    | ADD reg_val reg_val reg_val
+        {
+            ADD_compile(out, 3, (unsigned char) $2, $3, $4);
         }
     ;
 
 value: HEX_VAL
         {
-            printf("%s %i\n", $1->data, $1->length);
+            if ($1->length > 16) {
+                yyerror("hex overflow");
+                YYERROR;
+            }
             $$ = string_to_hex($1);
-            printf("%lu\n", $$);
             // Don't forget to deallocate the object
             FREE_STRING($1);
         }
@@ -69,6 +91,15 @@ value: HEX_VAL
             $$ = $1;
         }
     ;
+
+reg_val: REG_VAL
+    {
+        if ($1 > 15) {
+            yyerror("too high register (max 15)");
+            YYERROR;
+        }
+        $$ = $1;
+    }
 
 %%
 

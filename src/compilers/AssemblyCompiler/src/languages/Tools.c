@@ -4,7 +4,7 @@
  * Created:
  *   3/2/2020, 12:53:25 PM
  * Last edited:
- *   3/4/2020, 9:05:48 PM
+ *   3/6/2020, 2:25:48 PM
  * Auto updated?
  *   Yes
  *
@@ -32,18 +32,6 @@ struct string* MAKE_STRING(char* data, int length) {
 void FREE_STRING(struct string* s) {
     free(s->data);
     free(s);
-}
-
-void long_to_char(long number, char* result) {
-    unsigned char *uresult = (unsigned char*) result;
-    uresult[0] = (number >> 56) & 0xFF;
-    uresult[1] = (number >> 48) & 0xFF;
-    uresult[2] = (number >> 40) & 0xFF;
-    uresult[3] = (number >> 32) & 0xFF;
-    uresult[4] = (number >> 24) & 0xFF;
-    uresult[5] = (number >> 16) & 0xFF;
-    uresult[6] = (number >> 8) & 0xFF;
-    uresult[7] = number & 0xFF;
 }
 
 unsigned long string_to_hex(struct string* s) {

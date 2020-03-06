@@ -4,7 +4,7 @@
  * Created:
  *   3/1/2020, 2:55:54 PM
  * Last edited:
- *   3/4/2020, 8:43:51 PM
+ *   3/6/2020, 2:41:29 PM
  * Auto updated?
  *   Yes
  *
@@ -17,22 +17,54 @@
 #include "instructions.h"
 
 
-void SET_compile(FILE* output, int variation, char reg, long reg_val) {
+void SET_compile(FILE* output, int variation, unsigned char reg, unsigned long reg_val) {
     // Write the code first
-    char c;
-    c = (char) (0x00 + variation);
-    fwrite(&c, sizeof(char), 1, output);
+    unsigned char c;
+    c = (unsigned char) (0x00 + variation);
+    fwrite(&c, sizeof(unsigned char), 1, output);
     // Add the target register
-    fwrite(&reg, sizeof(char), 1, output);
+    fwrite(&reg, sizeof(unsigned char), 1, output);
     if (variation == 0) {
         // Put the long there
-        char to_ret[8];
-        long_to_char(reg_val, to_ret);
-        fwrite(to_ret, sizeof(char), 8, output);
+        fwrite(&reg_val, sizeof(unsigned long), 1, output);
     } else {
         // If there is only a char, write that and done
-        c = (char) (reg_val & 0xFF);
-        fwrite(&c, sizeof(char), 1, output);
-        printf("Value: %ld\n", reg_val);
+        c = (unsigned char) (reg_val & 0xFF);
+        fwrite(&c, sizeof(unsigned char), 1, output);
+    }
+}
+
+void ADD_compile(FILE* output, int variation, unsigned char reg, unsigned long reg_val_1, unsigned long reg_val_2) {
+    // Write the code first
+    unsigned char c;
+    c = (unsigned char) (0x02 + variation);
+    fwrite(&c, sizeof(unsigned char), 1, output);
+    // Add the target register
+    fwrite(&reg, sizeof(unsigned char), 1, output);
+    // Switch the variations:
+    switch(variation) {
+        case 0:
+            fwrite(&reg_val_1, sizeof(unsigned long), 1, output);
+            fwrite(&reg_val_2, sizeof(unsigned long), 1, output);
+            break;
+        case 1:
+            c = (unsigned char) (reg_val_1 & 0xFF);
+            fwrite(&c, sizeof(unsigned char), 1, output);
+            fwrite(&reg_val_2, sizeof(unsigned long), 1, output);
+            break;
+        case 2:
+            fwrite(&reg_val_1, sizeof(unsigned long), 1, output);
+            c = (unsigned char) (reg_val_2 & 0xFF);
+            fwrite(&c, sizeof(unsigned char), 1, output);
+            break;
+        case 3:
+            c = (unsigned char) (reg_val_1 & 0xFF);
+            fwrite(&c, sizeof(unsigned char), 1, output);
+            c = (unsigned char) (reg_val_2 & 0xFF);
+            fwrite(&c, sizeof(unsigned char), 1, output);
+            break;
+        default:
+            // Should never reach
+            break;
     }
 }

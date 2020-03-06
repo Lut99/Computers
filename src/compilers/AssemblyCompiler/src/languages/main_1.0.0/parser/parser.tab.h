@@ -70,7 +70,7 @@ union YYSTYPE
 {
 #line 18 "./parser.y" /* yacc.c:1909  */
 
-    int                 reg_val;
+    unsigned int        reg_val;
     struct string*      hex_val;
     unsigned long       value;
     struct instr_list*  instruction_list;

@@ -4,7 +4,7 @@
  * Created:
  *   3/2/2020, 12:53:37 PM
  * Last edited:
- *   3/4/2020, 7:50:41 PM
+ *   3/6/2020, 2:25:44 PM
  * Auto updated?
  *   Yes
  *
@@ -27,9 +27,6 @@ struct string {
 struct string* MAKE_STRING(char* data, int length);
 /* Frees given string object. */
 void FREE_STRING(struct string* s);
-
-/* Converts given long to a byte array. */
-void long_to_char(long number, char* result);
 
 /* Reads a string that contains a hexidecimal number, and returns the value of that number (assumes the hexadecimal has correct structure). */
 unsigned long string_to_hex(struct string* s);
