@@ -1,3 +1,5 @@
+# NOTE: For ideas about instruction format, see https://cyberchallengeit.github.io/programming-C
+
 CC=g++
 ARGS = -std=c++17 -O2
 
