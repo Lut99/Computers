@@ -4,7 +4,7 @@
  * Created:
  *   3/23/2020, 1:00:41 PM
  * Last edited:
- *   3/23/2020, 1:39:50 PM
+ *   3/26/2020, 5:09:46 PM
  * Auto updated?
  *   Yes
  *
@@ -65,6 +65,38 @@ namespace Assembler {
             SyntaxError(const unsigned long line_number, const unsigned long col_number, const std::string scanned_text)
                 : AssemblerException(line_number, col_number, std::string("Syntax error: ") + scanned_text),
                 text(scanned_text)
+            {}
+    };
+
+    class OverflowError: public SyntaxError {
+        public:
+            /* Exception for when a constant is too large. */
+            OverflowError(const unsigned long line_number, const unsigned long col_number, const std::string scanned_text)
+                : SyntaxError(line_number, col_number, scanned_text)
+            {}
+    };
+
+    class DecOverflowError: public OverflowError {
+        public:
+            /* Special case exception for when a decimal constant is too large. */
+            DecOverflowError(const unsigned long line_number, const unsigned long col_number, const std::string scanned_text)
+                : OverflowError(line_number, col_number, scanned_text)
+            {}
+    };
+
+    class HexOverflowError: public OverflowError {
+        public:
+            /* Special case exception for when a hex constant is too large. */
+            HexOverflowError(const unsigned long line_number, const unsigned long col_number, const std::string scanned_text)
+                : OverflowError(line_number, col_number, scanned_text)
+            {}
+    };
+
+    class RegOverflowError: public OverflowError {
+        public:
+            /* Special case exception for when a register constant is too large. */
+            RegOverflowError(const unsigned long line_number, const unsigned long col_number, const std::string scanned_text)
+                : OverflowError(line_number, col_number, scanned_text)
             {}
     };
 }

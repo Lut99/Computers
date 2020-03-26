@@ -14,7 +14,7 @@
 
 namespace Computer {
     enum CPUModel {
-        Medusa_I
+        Hermes_I
     };
 
     struct CPUConfig {

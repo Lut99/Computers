@@ -4,7 +4,7 @@
  * Created:
  *   3/23/2020, 12:30:22 PM
  * Last edited:
- *   3/23/2020, 1:23:40 PM
+ *   3/26/2020, 5:20:53 PM
  * Auto updated?
  *   Yes
  *
@@ -42,7 +42,10 @@ namespace Assembler {
         public:
             /* Defines a list of tokens that are returned by the Scanner. Child classes can of course declare their own. */
             enum tokens {
-                set
+                set,
+                dec_const,
+                hex_const,
+                reg_const
             };
 
             /* Notifies if the eof has been reached. */
@@ -51,8 +54,8 @@ namespace Assembler {
             /* The scanner class scans tokens from a given stream and returns each of those. Upon failure, the appropriate error is thrown. */
             Scanner(std::istream& file);
 
-            /* Returns a token scanned from the istream. Note that it returns int, which can then be compared to the default set of tokens or a custom set of tokens. Returns -1 if no more tokens are available. */
-            virtual int getToken();
+            /* Returns a token scanned from the istream. Note that it returns int, which can then be compared to the default set of tokens or a custom set of tokens. Returns -1 if no more tokens are available. If the token returns a value (like a constant), that value is put in the result unsigned long. */
+            virtual int getToken(unsigned long& value);
             /* Puts given token back on the stream so that it may be parsed again. Note that, for simplicity, it is put back on a temporary stack, which means this can only be done a fixed number of times. */
             virtual void putToken(int token);
     };
