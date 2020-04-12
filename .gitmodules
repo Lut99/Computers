@@ -1,0 +1,3 @@
+[submodule "src/ArgumentParser"]
+	path = src/ArgumentParser
+	url = git@github.com:Lut99/ArgumentParser
